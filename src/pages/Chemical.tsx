@@ -165,6 +165,7 @@ export default function Chemical() {
         setChemicalRequests((prev) => [...prev, response.data.data!]);
         setShowRequestForm(false);
         resetForm();
+        fetchData();
       }
     } catch (error) {
       console.error('Failed to submit request:', error);

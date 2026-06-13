@@ -5,7 +5,7 @@ import type { Schedule, ApiResponse, ScheduleConflict, ScheduleSuggestion } from
 
 const router = Router();
 
-router.get('/', authenticate, requireTeacher, (req: Request, res: Response<ApiResponse<Schedule[]>>) => {
+router.get('/', authenticate, (req: Request, res: Response<ApiResponse<Schedule[]>>) => {
   const { date, teacherId, labId } = req.query;
   let schedules = [...dataStore.schedules];
 

@@ -259,6 +259,7 @@ router.post('/waitlist', authenticate, requireStudent, (req: Request, res: Respo
     position: currentCount + 1,
     status: 'waiting',
     createdAt: new Date().toISOString(),
+    missedNotifiedCount: 0,
   };
 
   dataStore.waitlist.push(newWaitlistItem);
@@ -427,8 +428,19 @@ function cleanExpiredLocks(): void {
       const notifiedTime = new Date(item.notifiedAvailableAt).getTime();
       const timeout = 15 * 60 * 1000;
       if (now.getTime() - notifiedTime > timeout) {
-        item.status = 'waiting';
+        const currentCount = item.missedNotifiedCount ?? 0;
+        const newCount = currentCount + 1;
+
+        item.missedNotifiedCount = newCount;
+        item.createdAt = now.toISOString();
         delete item.notifiedAvailableAt;
+
+        if (newCount >= 2) {
+          item.status = 'cancelled';
+        } else {
+          item.status = 'waiting';
+        }
+
         recalcWaitlistPositions(item.scheduleId);
         expiredNotifiedBySchedule[item.scheduleId] = { labId: item.labId };
       }

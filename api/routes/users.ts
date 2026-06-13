@@ -5,7 +5,7 @@ import type { User, ApiResponse } from '../../shared/types';
 
 const router = Router();
 
-router.get('/', authenticate, requireAdmin, (req: Request, res: Response<ApiResponse<User[]>>) => {
+router.get('/', authenticate, (req: Request, res: Response<ApiResponse<User[]>>) => {
   const { role, department } = req.query;
   let users = [...dataStore.users];
 

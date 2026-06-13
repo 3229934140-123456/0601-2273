@@ -203,6 +203,7 @@ export interface WaitlistItem {
   notifiedAvailableAt?: string;
   status: 'waiting' | 'notified' | 'cancelled' | 'confirmed';
   createdAt: string;
+  missedNotifiedCount?: number;
 }
 
 export interface ApiResponse<T> {
