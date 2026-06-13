@@ -1,0 +1,170 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  font-family: 'Noto Sans SC', system-ui, -apple-system, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+}
+
+@layer components {
+  .glass-card {
+    @apply bg-dark-200/60 backdrop-blur-md border border-white/10 rounded-xl;
+  }
+
+  .glass-card-hover {
+    @apply glass-card transition-all duration-300 hover:bg-dark-200/80 hover:border-primary-500/50 hover:shadow-lg hover:shadow-primary-500/10;
+  }
+
+  .glow-text {
+    text-shadow: 0 0 10px rgba(22, 93, 255, 0.8), 0 0 20px rgba(22, 93, 255, 0.5);
+  }
+
+  .glow-border {
+    box-shadow: 0 0 15px rgba(22, 93, 255, 0.3), inset 0 0 15px rgba(22, 93, 255, 0.1);
+  }
+
+  .btn-primary {
+    @apply px-4 py-2 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-lg font-medium transition-all duration-200 hover:from-primary-600 hover:to-primary-700 hover:shadow-lg hover:shadow-primary-500/25 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-secondary {
+    @apply px-4 py-2 bg-dark-300 text-white rounded-lg font-medium transition-all duration-200 hover:bg-dark-400 active:scale-95;
+  }
+
+  .btn-success {
+    @apply px-4 py-2 bg-success text-white rounded-lg font-medium transition-all duration-200 hover:bg-green-600 active:scale-95;
+  }
+
+  .btn-danger {
+    @apply px-4 py-2 bg-danger text-white rounded-lg font-medium transition-all duration-200 hover:bg-red-600 active:scale-95;
+  }
+
+  .input-field {
+    @apply w-full px-4 py-2 bg-dark-200 border border-dark-400 rounded-lg text-white placeholder-dark-500 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-all duration-200;
+  }
+
+  .sidebar-link {
+    @apply flex items-center gap-3 px-4 py-3 text-dark-500 hover:text-white hover:bg-primary-500/20 rounded-lg transition-all duration-200 cursor-pointer;
+  }
+
+  .sidebar-link.active {
+    @apply text-white bg-primary-500/30 border-l-4 border-primary-500;
+  }
+
+  .data-table {
+    @apply w-full border-collapse;
+  }
+
+  .data-table th {
+    @apply px-4 py-3 text-left text-sm font-medium text-dark-500 bg-dark-200/50 border-b border-dark-400;
+  }
+
+  .data-table td {
+    @apply px-4 py-3 text-sm text-white border-b border-dark-400/50;
+  }
+
+  .data-table tr:hover {
+    @apply bg-dark-200/30;
+  }
+
+  .status-badge {
+    @apply px-3 py-1 rounded-full text-xs font-medium;
+  }
+
+  .status-success {
+    @apply bg-green-500/20 text-green-400;
+  }
+
+  .status-warning {
+    @apply bg-yellow-500/20 text-yellow-400;
+  }
+
+  .status-danger {
+    @apply bg-red-500/20 text-red-400;
+  }
+
+  .status-info {
+    @apply bg-blue-500/20 text-blue-400;
+  }
+
+  .status-pending {
+    @apply bg-orange-500/20 text-orange-400;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1D2129;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #3C4253;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #5D6478;
+}
+
+/* Grid background for dashboard */
+.grid-bg {
+  background-image: 
+    linear-gradient(rgba(22, 93, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(22, 93, 255, 0.03) 1px, transparent 1px);
+  background-size: 50px 50px;
+}
+
+/* Number counter animation */
+.number-counter {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Toast animation */
+@keyframes toastIn {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes toastOut {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+}
+
+.toast-enter {
+  animation: toastIn 0.3s ease-out;
+}
+
+.toast-exit {
+  animation: toastOut 0.3s ease-out;
+}
