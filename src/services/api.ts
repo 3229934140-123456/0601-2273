@@ -126,6 +126,8 @@ export const gradeAPI = {
 export const chemicalAPI = {
   list: (params?: { hazardLevel?: string; category?: string }) =>
     api.get<ApiResponse<Chemical[]>>('/chemical', { params }),
+  getRequests: (params?: { mine?: boolean }) =>
+    api.get<ApiResponse<ChemicalRequest[]>>('/chemical/requests', { params }),
   request: (data: { chemicalId: string; quantity: number; purpose: string; supervisorId: string }) =>
     api.post<ApiResponse<ChemicalRequest>>('/chemical/request', data),
   approveSupervisor: (id: string, data: { approved: boolean; comment?: string }) =>

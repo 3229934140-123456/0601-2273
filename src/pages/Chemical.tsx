@@ -15,6 +15,7 @@ import {
   ChevronRight,
 } from 'lucide-react';
 import { chemicalAPI, userAPI } from '@/services/api';
+import { useAuthStore } from '@/store/authStore';
 import type {
   Chemical,
   ChemicalRequest,
@@ -53,6 +54,10 @@ interface RequestFormData {
 }
 
 export default function Chemical() {
+  const { user, hasRole } = useAuthStore();
+  const isAdminOrLeader = hasRole('admin', 'leader');
+  const isTeacher = hasRole('teacher') && !isAdminOrLeader;
+
   const [chemicals, setChemicals] = useState<Chemical[]>([]);
   const [chemicalRequests, setChemicalRequests] = useState<ChemicalRequest[]>([]);
   const [purchaseRequests, setPurchaseRequests] = useState<PurchaseRequest[]>([]);
@@ -87,16 +92,23 @@ export default function Chemical() {
       if (filters.hazardLevel) params.hazardLevel = filters.hazardLevel;
       if (filters.category) params.category = filters.category;
 
-      const [chemicalsRes, purchaseRes] = await Promise.all([
+      const [chemicalsRes, requestsRes] = await Promise.all([
         chemicalAPI.list(params),
-        chemicalAPI.getPurchaseRequests(),
+        chemicalAPI.getRequests(),
       ]);
 
       if (chemicalsRes.data.success && chemicalsRes.data.data) {
         setChemicals(chemicalsRes.data.data);
       }
-      if (purchaseRes.data.success && purchaseRes.data.data) {
-        setPurchaseRequests(purchaseRes.data.data);
+      if (requestsRes.data.success && requestsRes.data.data) {
+        setChemicalRequests(requestsRes.data.data);
+      }
+
+      if (isAdminOrLeader) {
+        const purchaseRes = await chemicalAPI.getPurchaseRequests();
+        if (purchaseRes.data.success && purchaseRes.data.data) {
+          setPurchaseRequests(purchaseRes.data.data);
+        }
       }
     } catch (error) {
       console.error('Failed to fetch data:', error);
@@ -226,30 +238,32 @@ export default function Chemical() {
             )}
           >
             <Send className="inline w-4 h-4 mr-2" />
-            领用申请
-            {chemicalRequests.some((r) => r.status === 'pending') && (
+            {isTeacher ? '我的申请' : '领用审批'}
+            {isAdminOrLeader && chemicalRequests.some((r) => r.status === 'pending') && (
               <span className="ml-2 px-2 py-0.5 text-xs bg-warning text-white rounded-full">
                 {chemicalRequests.filter((r) => r.status === 'pending').length}
               </span>
             )}
           </button>
-          <button
-            onClick={() => setActiveTab('purchase')}
-            className={cn(
-              'px-4 py-2 rounded-lg font-medium transition-all',
-              activeTab === 'purchase'
-                ? 'bg-primary-500 text-white'
-                : 'bg-dark-300/50 text-dark-500 hover:text-white hover:bg-dark-300'
-            )}
-          >
-            <ShoppingCart className="inline w-4 h-4 mr-2" />
-            采购申请
-            {purchaseRequests.some((p) => p.status === 'pending') && (
-              <span className="ml-2 px-2 py-0.5 text-xs bg-warning text-white rounded-full">
-                {purchaseRequests.filter((p) => p.status === 'pending').length}
-              </span>
-            )}
-          </button>
+          {isAdminOrLeader && (
+            <button
+              onClick={() => setActiveTab('purchase')}
+              className={cn(
+                'px-4 py-2 rounded-lg font-medium transition-all',
+                activeTab === 'purchase'
+                  ? 'bg-primary-500 text-white'
+                  : 'bg-dark-300/50 text-dark-500 hover:text-white hover:bg-dark-300'
+              )}
+            >
+              <ShoppingCart className="inline w-4 h-4 mr-2" />
+              采购申请
+              {purchaseRequests.some((p) => p.status === 'pending') && (
+                <span className="ml-2 px-2 py-0.5 text-xs bg-warning text-white rounded-full">
+                  {purchaseRequests.filter((p) => p.status === 'pending').length}
+                </span>
+              )}
+            </button>
+          )}
         </div>
 
         {activeTab === 'inventory' && (
@@ -489,7 +503,7 @@ export default function Chemical() {
           <div className="glass-card p-6">
             <h2 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
               <Send className="w-5 h-5 text-primary-400" />
-              领用审批流程
+              {isTeacher ? '我的申请' : '领用审批流程'}
             </h2>
             <div className="space-y-4">
               {chemicalRequests.length === 0 ? (

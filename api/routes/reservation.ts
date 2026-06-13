@@ -54,6 +54,14 @@ router.post('/', authenticate, requireStudent, (req: Request, res: Response<ApiR
     return;
   }
 
+  const seatReserved = dataStore.reservations.find(
+    r => r.scheduleId === scheduleId && r.seatId === seatId && r.status !== 'cancelled'
+  );
+  if (seatReserved) {
+    res.status(400).json({ success: false, error: '该座位已被预约' });
+    return;
+  }
+
   const existingReservation = dataStore.reservations.find(
     r => r.scheduleId === scheduleId && r.studentId === userId && r.status !== 'cancelled'
   );
@@ -92,8 +100,6 @@ router.post('/', authenticate, requireStudent, (req: Request, res: Response<ApiR
     lockExpiresAt: lockExpiresAt.toISOString(),
     createdAt: now.toISOString(),
   };
-
-  seat.status = 'locked';
 
   dataStore.reservations.push(newReservation);
   res.json({ success: true, data: newReservation, message: '座位已锁定，请在15分钟内确认' });
@@ -134,11 +140,6 @@ router.post('/:id/confirm', authenticate, requireStudent, (req: Request, res: Re
   reservation.status = 'confirmed';
   delete reservation.lockedAt;
   delete reservation.lockExpiresAt;
-
-  const seat = dataStore.seats.find(s => s.id === reservation.seatId);
-  if (seat) {
-    seat.status = 'occupied';
-  }
 
   res.json({ success: true, data: reservation as Reservation, message: '预约确认成功' });
 });
@@ -330,7 +331,13 @@ router.post('/waitlist/:id/claim', authenticate, requireStudent, (req: Request, 
     return;
   }
 
-  const availableSeat = dataStore.seats.find(s => s.labId === schedule.labId && s.status === 'available');
+  const reservedSeatIds = dataStore.reservations
+    .filter(r => r.scheduleId === schedule.id && r.status !== 'cancelled')
+    .map(r => r.seatId);
+
+  const availableSeat = dataStore.seats.find(
+    s => s.labId === schedule.labId && s.status === 'available' && !reservedSeatIds.includes(s.id)
+  );
   if (!availableSeat) {
     res.status(400).json({ success: false, error: '暂无可用座位' });
     return;
@@ -359,7 +366,6 @@ router.post('/waitlist/:id/claim', authenticate, requireStudent, (req: Request, 
     createdAt: now.toISOString(),
   };
 
-  availableSeat.status = 'locked';
   waitlistItem.status = 'confirmed';
 
   const scheduleId = waitlistItem.scheduleId;
@@ -403,10 +409,6 @@ function cleanExpiredLocks(): void {
   dataStore.reservations = dataStore.reservations.filter(reservation => {
     if (reservation.status === 'locked' && reservation.lockExpiresAt) {
       if (new Date(reservation.lockExpiresAt) < now) {
-        const seat = dataStore.seats.find(s => s.id === reservation.seatId);
-        if (seat && seat.status === 'locked') {
-          seat.status = 'available';
-        }
         expiredReservationsBySchedule[reservation.scheduleId] = { labId: reservation.labId };
         return false;
       }
@@ -418,6 +420,8 @@ function cleanExpiredLocks(): void {
     notifyNextWaitlist(scheduleId, labId);
   });
 
+  const expiredNotifiedBySchedule: Record<string, { labId: string }> = {};
+
   dataStore.waitlist.forEach(item => {
     if (item.status === 'notified' && item.notifiedAvailableAt) {
       const notifiedTime = new Date(item.notifiedAvailableAt).getTime();
@@ -426,8 +430,13 @@ function cleanExpiredLocks(): void {
         item.status = 'waiting';
         delete item.notifiedAvailableAt;
         recalcWaitlistPositions(item.scheduleId);
+        expiredNotifiedBySchedule[item.scheduleId] = { labId: item.labId };
       }
     }
+  });
+
+  Object.entries(expiredNotifiedBySchedule).forEach(([scheduleId, { labId }]) => {
+    notifyNextWaitlist(scheduleId, labId);
   });
 }
 

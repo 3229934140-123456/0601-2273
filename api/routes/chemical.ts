@@ -1,11 +1,11 @@
 import { Router, Request, Response } from 'express';
 import { dataStore, generateId } from '../data/mockData';
 import { authenticate, requireTeacher, requireAdmin } from '../middleware/auth';
-import type { Chemical, ChemicalRequest, PurchaseRequest, ApiResponse } from '../../shared/types';
+import type { Chemical, ChemicalRequest, PurchaseRequest, ApiResponse, UserRole } from '../../shared/types';
 
 const router = Router();
 
-router.get('/', authenticate, requireAdmin, (req: Request, res: Response<ApiResponse<Chemical[]>>) => {
+router.get('/', authenticate, (req: Request, res: Response<ApiResponse<Chemical[]>>) => {
   const { hazardLevel, category } = req.query;
   let chemicals = [...dataStore.chemicals];
 
@@ -66,6 +66,25 @@ router.post('/request', authenticate, requireTeacher, (req: Request, res: Respon
   res.json({ success: true, data: newRequest, message: '领用申请已提交' });
 });
 
+router.get('/requests', authenticate, (req: Request, res: Response<ApiResponse<ChemicalRequest[]>>) => {
+  const { mine } = req.query;
+  const userId = (req as Request & { userId: string }).userId;
+  const userRole = (req as Request & { userRole: UserRole }).userRole;
+
+  let requests = [...dataStore.chemicalRequests];
+
+  const isAdminOrLeader = userRole === 'admin' || userRole === 'leader';
+  const shouldFilterMine = mine === '1' || !isAdminOrLeader;
+
+  if (shouldFilterMine) {
+    requests = requests.filter(r => r.requesterId === userId);
+  }
+
+  requests.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+  res.json({ success: true, data: requests as ChemicalRequest[] });
+});
+
 router.post('/request/:id/approve-supervisor', authenticate, requireTeacher, (req: Request, res: Response<ApiResponse<ChemicalRequest>>) => {
   const { id } = req.params;
   const { approved, comment } = req.body as { approved: boolean; comment?: string };
@@ -78,8 +97,10 @@ router.post('/request/:id/approve-supervisor', authenticate, requireTeacher, (re
 
   const request = dataStore.chemicalRequests[index];
   const userId = (req as Request & { userId: string }).userId;
+  const userRole = (req as Request & { userRole: UserRole }).userRole;
+  const isAdminOrLeader = userRole === 'admin' || userRole === 'leader';
 
-  if (request.supervisorId !== userId) {
+  if (request.supervisorId !== userId && !isAdminOrLeader) {
     res.status(403).json({ success: false, error: '您不是该申请的导师，无权审批' });
     return;
   }
