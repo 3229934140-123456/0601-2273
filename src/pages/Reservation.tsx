@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   ClipboardList,
   Building2,
@@ -13,9 +13,11 @@ import {
   Lock,
   Wrench,
   Search,
+  LogOut,
+  Zap,
 } from 'lucide-react';
 import { reservationAPI, scheduleAPI } from '@/services/api';
-import type { Reservation, Seat, Schedule, Lab } from '../../shared/types';
+import type { Reservation, Seat, Schedule, Lab, WaitlistItem } from '../../shared/types';
 import { cn } from '@/lib/utils';
 
 const MOCK_LABS: Lab[] = [
@@ -139,11 +141,24 @@ function CountdownTimer({ expiresAt, onExpire }: CountdownTimerProps) {
   );
 }
 
+function getWaitlistStatusBadge(status: WaitlistItem['status']) {
+  const statusMap = {
+    waiting: { className: 'status-info', label: '等待中' },
+    notified: { className: 'status-warning', label: '可认领' },
+    cancelled: { className: 'status-danger', label: '已取消' },
+    confirmed: { className: 'status-success', label: '已确认' },
+  };
+  return statusMap[status];
+}
+
 export default function Reservation() {
   const [seats, setSeats] = useState<Seat[]>([]);
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [schedules, setSchedules] = useState<Schedule[]>([]);
+  const [waitlist, setWaitlist] = useState<WaitlistItem[]>([]);
+  const [myWaitlist, setMyWaitlist] = useState<WaitlistItem[]>([]);
   const [loading, setLoading] = useState(false);
+  const [waitlistLoading, setWaitlistLoading] = useState(false);
   const [selectedLab, setSelectedLab] = useState('lab1');
   const [selectedSchedule, setSelectedSchedule] = useState('');
   const [selectedSeat, setSelectedSeat] = useState<Seat | null>(null);
@@ -151,9 +166,15 @@ export default function Reservation() {
   const [lockedReservation, setLockedReservation] = useState<Reservation | null>(null);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
+  const showMessage = useCallback((text: string, type: 'success' | 'error') => {
+    setMessage({ type, text });
+    setTimeout(() => setMessage(null), 3000);
+  }, []);
+
   useEffect(() => {
     fetchSchedules();
     fetchReservations();
+    fetchMyWaitlist();
   }, []);
 
   useEffect(() => {
@@ -161,6 +182,27 @@ export default function Reservation() {
       fetchSeats();
     }
   }, [selectedLab, selectedSchedule]);
+
+  useEffect(() => {
+    if (selectedSchedule) {
+      fetchWaitlist();
+    } else {
+      setWaitlist([]);
+    }
+  }, [selectedSchedule]);
+
+  useEffect(() => {
+    const pollInterval = setInterval(() => {
+      fetchReservations();
+      fetchMyWaitlist();
+      if (selectedSchedule) {
+        fetchWaitlist();
+        fetchSeats();
+      }
+    }, 5000);
+
+    return () => clearInterval(pollInterval);
+  }, [selectedSchedule]);
 
   const fetchSchedules = async () => {
     try {
@@ -197,10 +239,38 @@ export default function Reservation() {
         );
         if (locked) {
           setLockedReservation(locked);
+        } else {
+          setLockedReservation(null);
         }
       }
     } catch (error) {
       console.error('Failed to fetch reservations:', error);
+    }
+  };
+
+  const fetchWaitlist = async () => {
+    if (!selectedSchedule) return;
+    setWaitlistLoading(true);
+    try {
+      const response = await reservationAPI.getWaitlist(selectedSchedule);
+      if (response.data.success && response.data.data) {
+        setWaitlist(response.data.data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch waitlist:', error);
+    } finally {
+      setWaitlistLoading(false);
+    }
+  };
+
+  const fetchMyWaitlist = async () => {
+    try {
+      const response = await reservationAPI.getMyWaitlist();
+      if (response.data.success && response.data.data) {
+        setMyWaitlist(response.data.data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch my waitlist:', error);
     }
   };
 
@@ -212,7 +282,7 @@ export default function Reservation() {
 
   const handleReserve = async () => {
     if (!selectedSeat || !selectedSchedule) {
-      setMessage({ type: 'error', text: '请先选择排课' });
+      showMessage('请先选择排课', 'error');
       return;
     }
 
@@ -223,7 +293,7 @@ export default function Reservation() {
       });
 
       if (response.data.success && response.data.data) {
-        setMessage({ type: 'success', text: response.data.message || '座位锁定成功' });
+        showMessage(response.data.message || '座位锁定成功', 'success');
         setLockedReservation(response.data.data);
         setShowConfirmModal(false);
         setSelectedSeat(null);
@@ -231,7 +301,7 @@ export default function Reservation() {
         fetchReservations();
       }
     } catch (error: any) {
-      setMessage({ type: 'error', text: error.response?.data?.error || '预约失败' });
+      showMessage(error.response?.data?.error || '预约失败', 'error');
     }
   };
 
@@ -239,19 +309,70 @@ export default function Reservation() {
     try {
       const response = await reservationAPI.confirm(reservationId);
       if (response.data.success && response.data.data) {
-        setMessage({ type: 'success', text: '预约确认成功' });
+        showMessage('预约确认成功', 'success');
         setLockedReservation(null);
         fetchSeats();
         fetchReservations();
       }
     } catch (error: any) {
-      setMessage({ type: 'error', text: error.response?.data?.error || '确认失败' });
+      showMessage(error.response?.data?.error || '确认失败', 'error');
+    }
+  };
+
+  const handleJoinWaitlist = async () => {
+    if (!selectedSchedule) {
+      showMessage('请先选择排课', 'error');
+      return;
+    }
+
+    try {
+      const response = await reservationAPI.joinWaitlist({
+        scheduleId: selectedSchedule,
+        labId: selectedLab,
+      });
+
+      if (response.data.success && response.data.data) {
+        showMessage(response.data.message || '已加入候补队列', 'success');
+        fetchWaitlist();
+        fetchMyWaitlist();
+      }
+    } catch (error: any) {
+      showMessage(error.response?.data?.error || '加入候补失败', 'error');
+    }
+  };
+
+  const handleLeaveWaitlist = async (id: string) => {
+    try {
+      const response = await reservationAPI.leaveWaitlist(id);
+      if (response.data.success) {
+        showMessage(response.data.message || '已退出候补队列', 'success');
+        fetchWaitlist();
+        fetchMyWaitlist();
+      }
+    } catch (error: any) {
+      showMessage(error.response?.data?.error || '退出候补失败', 'error');
+    }
+  };
+
+  const handleClaimWaitlist = async (id: string) => {
+    try {
+      const response = await reservationAPI.claimWaitlist(id);
+      if (response.data.success && response.data.data) {
+        showMessage(response.data.message || '座位已锁定', 'success');
+        setLockedReservation(response.data.data);
+        fetchWaitlist();
+        fetchMyWaitlist();
+        fetchSeats();
+        fetchReservations();
+      }
+    } catch (error: any) {
+      showMessage(error.response?.data?.error || '认领失败', 'error');
     }
   };
 
   const handleTimerExpire = () => {
     setLockedReservation(null);
-    setMessage({ type: 'error', text: '锁定已超时，座位已释放' });
+    showMessage('锁定已超时，座位已释放', 'error');
     fetchSeats();
     fetchReservations();
   };
@@ -267,10 +388,16 @@ export default function Reservation() {
     return statusMap[status];
   };
 
-  const showMessage = (text: string, type: 'success' | 'error') => {
-    setMessage({ type, text });
-    setTimeout(() => setMessage(null), 3000);
-  };
+  const availableSeatsCount = useMemo(() => {
+    return seats.filter(s => s.status === 'available').length;
+  }, [seats]);
+
+  const isNoAvailableSeats = selectedSchedule && availableSeatsCount === 0;
+
+  const myWaitlistForCurrentSchedule = useMemo(() => {
+    if (!selectedSchedule) return null;
+    return myWaitlist.find(w => w.scheduleId === selectedSchedule);
+  }, [myWaitlist, selectedSchedule]);
 
   return (
     <div className="min-h-screen">
@@ -336,6 +463,15 @@ export default function Reservation() {
                     ))}
                   </select>
                 </div>
+                {isNoAvailableSeats && !myWaitlistForCurrentSchedule && (
+                  <button
+                    onClick={handleJoinWaitlist}
+                    className="btn-secondary flex items-center gap-2"
+                  >
+                    <Users className="w-4 h-4" />
+                    加入候补
+                  </button>
+                )}
               </div>
             </div>
 
@@ -358,6 +494,39 @@ export default function Reservation() {
                 </div>
               ) : (
                 <SeatGrid seats={seats} onSeatClick={handleSeatClick} />
+              )}
+
+              {isNoAvailableSeats && (
+                <div className="mt-6 p-4 bg-warning/10 border border-warning/30 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <AlertCircle className="w-5 h-5 text-warning flex-shrink-0" />
+                    <div className="flex-1">
+                      <p className="text-warning font-medium">当前排课座位已满</p>
+                      <p className="text-dark-500 text-sm mt-1">
+                        {myWaitlistForCurrentSchedule
+                          ? `您已在候补队列中，当前位置：第 ${myWaitlistForCurrentSchedule.position} 位`
+                          : '您可以加入候补队列，有座位释放时将按顺序通知您'}
+                      </p>
+                    </div>
+                    {myWaitlistForCurrentSchedule ? (
+                      <button
+                        onClick={() => handleLeaveWaitlist(myWaitlistForCurrentSchedule.id)}
+                        className="btn-danger text-sm flex items-center gap-1"
+                      >
+                        <LogOut className="w-4 h-4" />
+                        退出候补
+                      </button>
+                    ) : (
+                      <button
+                        onClick={handleJoinWaitlist}
+                        className="btn-primary flex items-center gap-2"
+                      >
+                        <Users className="w-4 h-4" />
+                        加入候补
+                      </button>
+                    )}
+                  </div>
+                </div>
               )}
             </div>
 
@@ -448,13 +617,174 @@ export default function Reservation() {
               <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
                 <Users className="w-5 h-5 text-primary-400" />
                 候补队列
+                {selectedSchedule && waitlist.length > 0 && (
+                  <span className="ml-auto text-sm text-dark-500">
+                    共 {waitlist.length} 人
+                  </span>
+                )}
               </h3>
-              <div className="text-center py-8 text-dark-500">
-                <Users className="w-12 h-12 mx-auto mb-2 opacity-30" />
-                <p>暂无候补排队</p>
-                <p className="text-xs mt-1">座位满员时可加入候补</p>
-              </div>
+
+              {!selectedSchedule ? (
+                <div className="text-center py-8 text-dark-500">
+                  <Users className="w-12 h-12 mx-auto mb-2 opacity-30" />
+                  <p>请先选择排课</p>
+                  <p className="text-xs mt-1">选择排课后查看候补队列</p>
+                </div>
+              ) : waitlistLoading ? (
+                <div className="flex items-center justify-center py-8">
+                  <div className="animate-spin w-6 h-6 border-3 border-primary-500 border-t-transparent rounded-full" />
+                </div>
+              ) : waitlist.length === 0 ? (
+                <div className="text-center py-8 text-dark-500">
+                  <Users className="w-12 h-12 mx-auto mb-2 opacity-30" />
+                  <p>暂无候补排队</p>
+                  <p className="text-xs mt-1">座位满员时可加入候补</p>
+                </div>
+              ) : (
+                <div className="space-y-2 max-h-[320px] overflow-y-auto">
+                  {waitlist.map((item, idx) => {
+                    const isMine = myWaitlist.some(m => m.id === item.id);
+                    const myItem = myWaitlist.find(m => m.id === item.id);
+                    const status = getWaitlistStatusBadge(item.status);
+                    const schedule = schedules.find(s => s.id === item.scheduleId);
+                    return (
+                      <div
+                        key={item.id}
+                        className={cn(
+                          'p-3 rounded-lg border transition-all',
+                          isMine && item.status === 'notified'
+                            ? 'bg-warning/20 border-warning/50 animate-pulse'
+                            : isMine
+                              ? 'bg-primary-500/10 border-primary-500/30'
+                              : 'bg-dark-300/50 border-dark-400/50'
+                        )}
+                      >
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center gap-2">
+                            <span className={cn(
+                              'w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold',
+                              idx === 0 ? 'bg-warning text-dark-900' : 'bg-dark-400 text-white'
+                            )}>
+                              {item.position}
+                            </span>
+                            <span className={cn(
+                              'font-medium',
+                              isMine ? 'text-primary-400' : 'text-white'
+                            )}>
+                              {item.studentName}
+                              {isMine && <span className="ml-1 text-xs">(我)</span>}
+                            </span>
+                          </div>
+                          <span className={cn('status-badge text-xs', status.className)}>
+                            {status.label}
+                          </span>
+                        </div>
+
+                        {isMine && item.status === 'notified' && (
+                          <div className="mb-3 p-2 bg-warning/30 rounded border border-warning/50">
+                            <div className="flex items-center gap-2 text-warning text-sm font-medium">
+                              <Zap className="w-4 h-4" />
+                              有座位释放，您可锁定！
+                            </div>
+                          </div>
+                        )}
+
+                        <div className="text-xs text-dark-500 mb-2">
+                          {schedule?.courseName} · {schedule?.date}
+                        </div>
+
+                        {isMine && myItem && (
+                          <div className="flex gap-2">
+                            {myItem.status === 'notified' && (
+                              <button
+                                onClick={() => handleClaimWaitlist(myItem.id)}
+                                className="btn-primary text-xs py-1.5 flex-1 flex items-center justify-center gap-1"
+                              >
+                                <Lock className="w-3 h-3" />
+                                立即锁定
+                              </button>
+                            )}
+                            {(myItem.status === 'waiting' || myItem.status === 'notified') && (
+                              <button
+                                onClick={() => handleLeaveWaitlist(myItem.id)}
+                                className="btn-secondary text-xs py-1.5 flex-1 flex items-center justify-center gap-1"
+                              >
+                                <LogOut className="w-3 h-3" />
+                                退出候补
+                              </button>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
+
+            {myWaitlist.length > 0 && (
+              <div className="glass-card p-4">
+                <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                  <Zap className="w-5 h-5 text-warning" />
+                  我的候补
+                </h3>
+                <div className="space-y-2 max-h-[240px] overflow-y-auto">
+                  {myWaitlist.map((item) => {
+                    const status = getWaitlistStatusBadge(item.status);
+                    const schedule = schedules.find(s => s.id === item.scheduleId);
+                    const isNotified = item.status === 'notified';
+                    return (
+                      <div
+                        key={item.id}
+                        className={cn(
+                          'p-3 rounded-lg border',
+                          isNotified
+                            ? 'bg-warning/20 border-warning/50'
+                            : 'bg-dark-300/50 border-dark-400/50'
+                        )}
+                      >
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-white font-medium text-sm">
+                            第 {item.position} 位
+                          </span>
+                          <span className={cn('status-badge text-xs', status.className)}>
+                            {status.label}
+                          </span>
+                        </div>
+                        <div className="text-xs text-dark-500 space-y-1 mb-2">
+                          <div className="flex items-center gap-1">
+                            <Calendar className="w-3 h-3" />
+                            <span>{schedule?.courseName || '-'}</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Clock className="w-3 h-3" />
+                            <span>{schedule?.date} {schedule?.startTime}</span>
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          {isNotified && (
+                            <button
+                              onClick={() => handleClaimWaitlist(item.id)}
+                              className="btn-primary text-xs py-1.5 flex-1 flex items-center justify-center gap-1"
+                            >
+                              <Lock className="w-3 h-3" />
+                              立即锁定
+                            </button>
+                          )}
+                          <button
+                            onClick={() => handleLeaveWaitlist(item.id)}
+                            className="btn-danger text-xs py-1.5 flex-1 flex items-center justify-center gap-1"
+                          >
+                            <LogOut className="w-3 h-3" />
+                            退出
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

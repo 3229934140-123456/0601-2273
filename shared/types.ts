@@ -193,6 +193,18 @@ export interface DashboardStats {
   alerts: { id: string; type: 'warning' | 'danger'; message: string; timestamp: string }[];
 }
 
+export interface WaitlistItem {
+  id: string;
+  scheduleId: string;
+  labId: string;
+  studentId: string;
+  studentName: string;
+  position: number;
+  notifiedAvailableAt?: string;
+  status: 'waiting' | 'notified' | 'cancelled' | 'confirmed';
+  createdAt: string;
+}
+
 export interface ApiResponse<T> {
   success: boolean;
   data?: T;

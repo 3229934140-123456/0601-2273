@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import {
   PieChart,
   Pie,
@@ -22,12 +22,32 @@ import {
   CheckCircle,
   Clock,
   Activity,
+  Wifi,
+  WifiOff,
+  WifiIcon,
 } from 'lucide-react';
 import { dashboardAPI } from '@/services/api';
 import type { DashboardStats } from '../../shared/types';
 import { cn } from '@/lib/utils';
 
 const COLORS = ['#165DFF', '#00B42A', '#FF7D00', '#F53F3F', '#722ED1', '#14C9C9'];
+const SSE_TIMEOUT_MS = 30000;
+const RELATIVE_TIME_UPDATE_INTERVAL = 1000;
+
+type ConnectionStatus = 'connecting' | 'live' | 'disconnected';
+
+function getRelativeTime(date: Date | null, now: Date): string {
+  if (!date) return '';
+  const diffMs = now.getTime() - date.getTime();
+  const diffSec = Math.max(0, Math.floor(diffMs / 1000));
+  if (diffSec < 1) return '刚刚';
+  if (diffSec < 60) return `${diffSec}秒前`;
+  const diffMin = Math.floor(diffSec / 60);
+  if (diffMin < 60) return `${diffMin}分钟前`;
+  const diffHour = Math.floor(diffMin / 60);
+  if (diffHour < 24) return `${diffHour}小时前`;
+  return date.toLocaleString('zh-CN');
+}
 
 function AnimatedNumber({ value, suffix = '', duration = 1000 }: { value: number; suffix?: string; duration?: number }) {
   const [displayValue, setDisplayValue] = useState(0);
@@ -121,6 +141,59 @@ export default function Dashboard() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
+  const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>('connecting');
+  const [, setNowTick] = useState(new Date());
+
+  const eventSourceRef = useRef<EventSource | null>(null);
+  const lastMessageTimeRef = useRef<number>(Date.now());
+  const timeoutTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const relativeTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const clearTimers = useCallback(() => {
+    if (timeoutTimerRef.current) {
+      clearTimeout(timeoutTimerRef.current);
+      timeoutTimerRef.current = null;
+    }
+    if (relativeTimerRef.current) {
+      clearInterval(relativeTimerRef.current);
+      relativeTimerRef.current = null;
+    }
+  }, []);
+
+  const connectSSE = useCallback(() => {
+    if (eventSourceRef.current) {
+      try {
+        eventSourceRef.current.close();
+      } catch {
+        // ignore
+      }
+      eventSourceRef.current = null;
+    }
+
+    setConnectionStatus('connecting');
+    lastMessageTimeRef.current = Date.now();
+
+    const eventSource = dashboardAPI.getStatsStream(
+      (data) => {
+        setStats(data);
+        setLastUpdate(new Date());
+        setLoading(false);
+        setConnectionStatus('live');
+        lastMessageTimeRef.current = Date.now();
+      },
+      (status) => {
+        if (status === 'open') {
+          setConnectionStatus('live');
+        } else if (status === 'closed') {
+          setConnectionStatus('disconnected');
+        } else if (status === 'error') {
+          setConnectionStatus((prev) => (prev === 'live' ? 'connecting' : prev));
+        }
+      }
+    );
+
+    eventSourceRef.current = eventSource;
+  }, []);
 
   useEffect(() => {
     const fetchInitialData = async () => {
@@ -129,6 +202,7 @@ export default function Dashboard() {
         if (response.data.success && response.data.data) {
           setStats(response.data.data);
           setLastUpdate(new Date());
+          lastMessageTimeRef.current = Date.now();
         }
       } catch (error) {
         console.error('Failed to fetch initial stats:', error);
@@ -138,17 +212,29 @@ export default function Dashboard() {
     };
 
     fetchInitialData();
+    connectSSE();
 
-    const eventSource = dashboardAPI.getStatsStream((data) => {
-      setStats(data);
-      setLastUpdate(new Date());
-      setLoading(false);
-    });
+    relativeTimerRef.current = setInterval(() => {
+      setNowTick(new Date());
+    }, RELATIVE_TIME_UPDATE_INTERVAL);
+
+    timeoutTimerRef.current = setTimeout(function checkStuck() {
+      const elapsed = Date.now() - lastMessageTimeRef.current;
+      if (elapsed >= SSE_TIMEOUT_MS && eventSourceRef.current) {
+        console.warn(`SSE no message for ${SSE_TIMEOUT_MS}ms, reconnecting...`);
+        connectSSE();
+      }
+      timeoutTimerRef.current = setTimeout(checkStuck, 5000);
+    }, SSE_TIMEOUT_MS);
 
     return () => {
-      eventSource.close();
+      clearTimers();
+      if (eventSourceRef.current) {
+        eventSourceRef.current.close();
+        eventSourceRef.current = null;
+      }
     };
-  }, []);
+  }, [connectSSE, clearTimers]);
 
   const occupancyRate = stats
     ? Math.round(
@@ -183,20 +269,60 @@ export default function Dashboard() {
     );
   }
 
+  const connectionConfig: Record<ConnectionStatus, { label: string; color: string; bg: string; Icon: React.ElementType; pulse: boolean }> = {
+    live: {
+      label: '实时连接',
+      color: 'text-success',
+      bg: 'bg-success/10 border-success/30',
+      Icon: Wifi,
+      pulse: true,
+    },
+    connecting: {
+      label: '连接中...',
+      color: 'text-warning',
+      bg: 'bg-warning/10 border-warning/30',
+      Icon: WifiIcon,
+      pulse: true,
+    },
+    disconnected: {
+      label: '连接断开',
+      color: 'text-danger',
+      bg: 'bg-danger/10 border-danger/30',
+      Icon: WifiOff,
+      pulse: false,
+    },
+  };
+
+  const conn = connectionConfig[connectionStatus];
+  const now = new Date();
+
   return (
     <div className="min-h-screen p-6 grid-bg">
       <div className="max-w-[1920px] mx-auto">
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-white glow-text mb-2">
-              <Activity className="inline w-8 h-8 mr-3 text-primary-400" />
+            <h1 className="text-3xl font-bold text-white glow-text mb-2 flex items-center gap-3 flex-wrap">
+              <Activity className="inline w-8 h-8 text-primary-400" />
               实验室监控大屏
+              <span
+                className={cn(
+                  'inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium border',
+                  conn.bg,
+                  conn.color
+                )}
+              >
+                <conn.Icon className={cn('w-4 h-4', conn.pulse && 'animate-pulse')} />
+                {conn.label}
+              </span>
             </h1>
             <p className="text-dark-500">
               {lastUpdate && (
-                <span className="flex items-center gap-2">
+                <span className="flex items-center gap-2 flex-wrap">
                   <Clock className="w-4 h-4" />
                   最后更新: {lastUpdate.toLocaleTimeString('zh-CN')}
+                  <span className="text-dark-400">
+                    （{getRelativeTime(lastUpdate, now)}）
+                  </span>
                 </span>
               )}
             </p>

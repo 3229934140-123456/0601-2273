@@ -1,4 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
 import type {
   User,
   Lab,
@@ -14,12 +16,45 @@ import type {
   ChemicalRequest,
   PurchaseRequest,
   DashboardStats,
+  WaitlistItem,
 } from '../../shared/types';
+
+export const DATA_FILE_PATH = path.resolve(process.cwd(), 'api/data/datastore.json');
+// 数据持久化文件路径
+
+const BASE_TABLES = ['users', 'labs', 'courses', 'chemicals'] as const;
+const BUSINESS_TABLES = [
+  'schedules',
+  'seats',
+  'reservations',
+  'equipments',
+  'equipmentBorrows',
+  'labReports',
+  'grades',
+  'chemicalRequests',
+  'purchaseRequests',
+  'waitlist',
+  'users',
+] as const;
+const SAVE_KEYS = [
+  'users',
+  'schedules',
+  'seats',
+  'reservations',
+  'equipments',
+  'equipmentBorrows',
+  'labReports',
+  'grades',
+  'chemicals',
+  'chemicalRequests',
+  'purchaseRequests',
+  'waitlist',
+] as const;
 
 export const mockUsers: User[] = [
   {
     id: 'u1',
-    username: 'student1',
+    username: 'student',
     name: '张三',
     role: 'student',
     email: 'zhangsan@edu.cn',
@@ -39,7 +74,7 @@ export const mockUsers: User[] = [
   },
   {
     id: 'u3',
-    username: 'teacher1',
+    username: 'teacher',
     name: '王教授',
     role: 'teacher',
     email: 'wangpro@edu.cn',
@@ -49,8 +84,8 @@ export const mockUsers: User[] = [
   },
   {
     id: 'u4',
-    username: 'admin1',
-    name: '实验室管理员',
+    username: 'admin',
+    name: '赵管理员',
     role: 'admin',
     email: 'admin@edu.cn',
     phone: '13700137001',
@@ -59,7 +94,7 @@ export const mockUsers: User[] = [
   },
   {
     id: 'u5',
-    username: 'leader1',
+    username: 'leader',
     name: '李院长',
     role: 'leader',
     email: 'dean@edu.cn',
@@ -375,6 +410,8 @@ export const mockPurchaseRequests: PurchaseRequest[] = [
   },
 ];
 
+export const mockWaitlist: WaitlistItem[] = [];
+
 export function generateDashboardStats(): DashboardStats {
   return {
     labOccupancy: [
@@ -425,9 +462,10 @@ interface DataStore {
   chemicals: Chemical[];
   chemicalRequests: ChemicalRequest[];
   purchaseRequests: PurchaseRequest[];
+  waitlist: WaitlistItem[];
 }
 
-export const dataStore: DataStore = {
+const defaultStore: DataStore = {
   users: [...mockUsers],
   labs: [...mockLabs],
   courses: [...mockCourses],
@@ -441,7 +479,166 @@ export const dataStore: DataStore = {
   chemicals: [...mockChemicals],
   chemicalRequests: [...mockChemicalRequests],
   purchaseRequests: [...mockPurchaseRequests],
+  waitlist: [...mockWaitlist],
 };
+
+function deepMerge<T>(target: T, source: Partial<T>): T {
+  if (source === null || source === undefined) return target;
+  if (Array.isArray(target) && Array.isArray(source)) {
+    return [...source] as unknown as T;
+  }
+  if (typeof target === 'object' && typeof source === 'object' && target !== null) {
+    const result = { ...target } as any;
+    for (const key of Object.keys(source as any)) {
+      if (key in (target as any)) {
+        result[key] = deepMerge((target as any)[key], (source as any)[key]);
+      } else {
+        result[key] = (source as any)[key];
+      }
+    }
+    return result;
+  }
+  return source as T;
+}
+
+function mergeArrayById<T extends { id?: string }>(mockArr: T[], fileArr: T[]): T[] {
+  const map = new Map<string, T>();
+  for (const item of mockArr) {
+    if (item.id !== undefined) {
+      map.set(item.id, { ...item });
+    }
+  }
+  for (const item of fileArr) {
+    if (item.id !== undefined) {
+      map.set(item.id, { ...item });
+    }
+  }
+  return Array.from(map.values());
+}
+
+function loadStoreFromFile(): DataStore {
+  const store: DataStore = {
+    users: [...defaultStore.users],
+    labs: [...defaultStore.labs],
+    courses: [...defaultStore.courses],
+    schedules: [...defaultStore.schedules],
+    seats: [...defaultStore.seats],
+    reservations: [...defaultStore.reservations],
+    equipments: [...defaultStore.equipments],
+    equipmentBorrows: [...defaultStore.equipmentBorrows],
+    labReports: [...defaultStore.labReports],
+    grades: [...defaultStore.grades],
+    chemicals: [...defaultStore.chemicals],
+    chemicalRequests: [...defaultStore.chemicalRequests],
+    purchaseRequests: [...defaultStore.purchaseRequests],
+    waitlist: [...defaultStore.waitlist],
+  };
+
+  try {
+    if (!fs.existsSync(DATA_FILE_PATH)) return store;
+    const raw = fs.readFileSync(DATA_FILE_PATH, 'utf-8');
+    const fileData = JSON.parse(raw) as Partial<DataStore>;
+
+    store.users = mergeArrayById(defaultStore.users, fileData.users || []);
+    store.labs = mergeArrayById(defaultStore.labs, fileData.labs || []);
+    store.courses = mergeArrayById(defaultStore.courses, fileData.courses || []);
+    store.chemicals = mergeArrayById(defaultStore.chemicals, fileData.chemicals || []);
+
+    store.schedules = fileData.schedules?.length ? fileData.schedules : [...defaultStore.schedules];
+    store.seats = fileData.seats?.length ? fileData.seats : [...defaultStore.seats];
+    store.reservations = fileData.reservations?.length ? fileData.reservations : [...defaultStore.reservations];
+    store.equipments = fileData.equipments?.length ? fileData.equipments : [...defaultStore.equipments];
+    store.equipmentBorrows = fileData.equipmentBorrows?.length ? fileData.equipmentBorrows : [...defaultStore.equipmentBorrows];
+    store.labReports = fileData.labReports?.length ? fileData.labReports : [...defaultStore.labReports];
+    store.grades = fileData.grades?.length ? fileData.grades : [...defaultStore.grades];
+    store.chemicalRequests = fileData.chemicalRequests?.length ? fileData.chemicalRequests : [...defaultStore.chemicalRequests];
+    store.purchaseRequests = fileData.purchaseRequests?.length ? fileData.purchaseRequests : [...defaultStore.purchaseRequests];
+    store.waitlist = fileData.waitlist?.length ? fileData.waitlist : [...defaultStore.waitlist];
+  } catch (e) {
+    console.error('[mockData] loadStoreFromFile failed:', e);
+  }
+  return store;
+}
+
+function saveStoreToFile(): void {
+  try {
+    const toSave: Partial<DataStore> = {};
+    for (const key of SAVE_KEYS) {
+      (toSave as any)[key] = (dataStore as any)[key];
+    }
+    fs.writeFileSync(DATA_FILE_PATH, JSON.stringify(toSave, null, 2), 'utf-8');
+  } catch (e) {
+    console.error('[mockData] saveStoreToFile failed:', e);
+  }
+}
+
+let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+function debouncedSave(): void {
+  if (debounceTimer) clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(() => {
+    saveStoreToFile();
+    debounceTimer = null;
+  }, 300);
+}
+
+function createProxy<T extends object>(obj: T, rootPath: string): T {
+  return new Proxy(obj, {
+    set(target, prop, value) {
+      (target as any)[prop] = value;
+      debouncedSave();
+      return true;
+    },
+    deleteProperty(target, prop) {
+      delete (target as any)[prop];
+      debouncedSave();
+      return true;
+    },
+    get(target, prop, receiver) {
+      const value = Reflect.get(target, prop, receiver);
+      if (value && typeof value === 'object' && !Array.isArray(value) && !(value instanceof Date)) {
+        return createProxy(value, `${rootPath}.${String(prop)}`);
+      }
+      if (Array.isArray(value)) {
+        return new Proxy(value, {
+          set(arrTarget, arrProp, arrValue) {
+            (arrTarget as any)[arrProp] = arrValue;
+            debouncedSave();
+            return true;
+          },
+          deleteProperty(arrTarget, arrProp) {
+            delete (arrTarget as any)[arrProp];
+            debouncedSave();
+            return true;
+          },
+          get(arrTarget, arrProp, arrReceiver) {
+            const arrValue = Reflect.get(arrTarget, arrProp, arrReceiver);
+            if (typeof arrProp === 'symbol' || arrProp === 'constructor') {
+              return arrValue;
+            }
+            if (['push', 'pop', 'shift', 'unshift', 'splice', 'sort', 'reverse'].includes(String(arrProp))) {
+              return (...args: any[]) => {
+                const result = (Array.prototype as any)[arrProp].apply(arrTarget, args);
+                debouncedSave();
+                return result;
+              };
+            }
+            if (arrValue && typeof arrValue === 'object') {
+              return createProxy(arrValue, `${rootPath}.${String(arrProp)}`);
+            }
+            return arrValue;
+          },
+        });
+      }
+      return value;
+    },
+  });
+}
+
+const _initializedStore = loadStoreFromFile();
+export const dataStore: DataStore = createProxy(_initializedStore, 'dataStore') as DataStore;
+if (!fs.existsSync(DATA_FILE_PATH)) {
+  saveStoreToFile();
+}
 
 export function generateId(): string {
   return uuidv4();

@@ -16,6 +16,7 @@ import type {
   ApiResponse,
   LoginRequest,
   LoginResponse,
+  WaitlistItem,
 } from '../../shared/types';
 
 const api = axios.create({
@@ -77,6 +78,18 @@ export const reservationAPI = {
     api.get<ApiResponse<Seat[]>>(`/reservation/lab/${labId}/seats`, {
       params: scheduleId ? { scheduleId } : undefined,
     }),
+  getWaitlist: (scheduleId?: string) =>
+    api.get<ApiResponse<WaitlistItem[]>>('/reservation/waitlist', {
+      params: scheduleId ? { scheduleId } : undefined,
+    }),
+  getMyWaitlist: () =>
+    api.get<ApiResponse<WaitlistItem[]>>('/reservation/waitlist/my'),
+  joinWaitlist: (data: { scheduleId: string; labId: string }) =>
+    api.post<ApiResponse<WaitlistItem>>('/reservation/waitlist', data),
+  leaveWaitlist: (id: string) =>
+    api.delete<ApiResponse<void>>(`/reservation/waitlist/${id}`),
+  claimWaitlist: (id: string) =>
+    api.post<ApiResponse<Reservation>>(`/reservation/waitlist/${id}/claim`),
 };
 
 export const equipmentAPI = {
@@ -130,11 +143,17 @@ export const chemicalAPI = {
 export const dashboardAPI = {
   getStats: () =>
     api.get<ApiResponse<DashboardStats>>('/dashboard/stats'),
-  getStatsStream: (onMessage: (data: DashboardStats) => void) => {
-    const token = localStorage.getItem('token');
+  getStatsStream: (
+    onMessage: (data: DashboardStats) => void,
+    onConnectionChange?: (status: 'open' | 'error' | 'closed') => void
+  ) => {
     const eventSource = new EventSource('/api/dashboard/stats/stream', {
       withCredentials: true,
     });
+
+    eventSource.onopen = () => {
+      onConnectionChange?.('open');
+    };
 
     eventSource.onmessage = (event) => {
       try {
@@ -149,7 +168,11 @@ export const dashboardAPI = {
 
     eventSource.onerror = (error) => {
       console.error('SSE error:', error);
-      eventSource.close();
+      if (eventSource.readyState === EventSource.CLOSED) {
+        onConnectionChange?.('closed');
+      } else {
+        onConnectionChange?.('error');
+      }
     };
 
     return eventSource;

@@ -29,11 +29,11 @@ interface MenuItem {
 }
 
 const menuItems: MenuItem[] = [
-  { path: '/', label: '首页', icon: Home, roles: ['student', 'teacher', 'admin', 'leader'] },
+  { path: '/dashboard', label: '大屏监控', icon: Home, roles: ['teacher', 'admin', 'leader'] },
   { path: '/schedule', label: '排课管理', icon: Calendar, roles: ['teacher', 'admin', 'leader'] },
   { path: '/reservation', label: '预约管理', icon: ClipboardList, roles: ['student', 'teacher', 'admin', 'leader'] },
-  { path: '/equipment', label: '设备借用', icon: Wrench, roles: ['student', 'teacher', 'admin', 'leader'] },
-  { path: '/report', label: '实验报告', icon: FileText, roles: ['student', 'teacher', 'admin', 'leader'] },
+  { path: '/equipment', label: '设备借用', icon: Wrench, roles: ['teacher', 'admin', 'leader'] },
+  { path: '/report', label: '实验报告', icon: FileText, roles: ['teacher', 'admin', 'leader'] },
   { path: '/grade', label: '成绩管理', icon: BarChart3, roles: ['student', 'teacher', 'admin', 'leader'] },
   { path: '/chemical', label: '危化品管理', icon: FlaskConical, roles: ['admin', 'leader'] },
   { path: '/data', label: '数据中心', icon: Database, roles: ['admin', 'leader'] },

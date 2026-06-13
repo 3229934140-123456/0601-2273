@@ -1,0 +1,1400 @@
+{
+  "users": [
+    {
+      "id": "u1",
+      "username": "student",
+      "name": "张三",
+      "role": "student",
+      "email": "zhangsan@edu.cn",
+      "phone": "13800138001",
+      "department": "计算机学院",
+      "creditScore": 95
+    },
+    {
+      "id": "u2",
+      "username": "student2",
+      "name": "李四",
+      "role": "student",
+      "email": "lisi@edu.cn",
+      "phone": "13800138002",
+      "department": "计算机学院",
+      "creditScore": 88
+    },
+    {
+      "id": "u3",
+      "username": "teacher",
+      "name": "王教授",
+      "role": "teacher",
+      "email": "wangpro@edu.cn",
+      "phone": "13900139001",
+      "department": "计算机学院",
+      "creditScore": 100
+    },
+    {
+      "id": "u4",
+      "username": "admin",
+      "name": "赵管理员",
+      "role": "admin",
+      "email": "admin@edu.cn",
+      "phone": "13700137001",
+      "department": "实验中心",
+      "creditScore": 100
+    },
+    {
+      "id": "u5",
+      "username": "leader",
+      "name": "李院长",
+      "role": "leader",
+      "email": "dean@edu.cn",
+      "phone": "13600136001",
+      "department": "计算机学院",
+      "creditScore": 100
+    }
+  ],
+  "schedules": [
+    {
+      "id": "s1",
+      "courseId": "c1",
+      "courseName": "数据结构实验",
+      "teacherId": "u3",
+      "teacherName": "王教授",
+      "labId": "lab1",
+      "labName": "计算机实验室A",
+      "className": "计算机2301班",
+      "date": "2026-06-15",
+      "startTime": "08:30",
+      "endTime": "10:30",
+      "status": "scheduled"
+    },
+    {
+      "id": "s2",
+      "courseId": "c2",
+      "courseName": "操作系统实验",
+      "teacherId": "u3",
+      "teacherName": "王教授",
+      "labId": "lab1",
+      "labName": "计算机实验室A",
+      "className": "计算机2301班",
+      "date": "2026-06-16",
+      "startTime": "14:00",
+      "endTime": "16:00",
+      "status": "scheduled"
+    },
+    {
+      "id": "s3",
+      "courseId": "c3",
+      "courseName": "计算机网络实验",
+      "teacherId": "u3",
+      "teacherName": "王教授",
+      "labId": "lab2",
+      "labName": "计算机实验室B",
+      "className": "计算机2302班",
+      "date": "2026-06-14",
+      "startTime": "08:30",
+      "endTime": "10:30",
+      "status": "ongoing"
+    },
+    {
+      "id": "s4",
+      "courseId": "c4",
+      "courseName": "数据库系统实验",
+      "teacherId": "u3",
+      "teacherName": "王教授",
+      "labId": "lab1",
+      "labName": "计算机实验室A",
+      "className": "计算机2302班",
+      "date": "2026-06-13",
+      "startTime": "14:00",
+      "endTime": "16:00",
+      "status": "completed"
+    }
+  ],
+  "seats": [
+    {
+      "id": "seat-lab1-0-0",
+      "labId": "lab1",
+      "seatNumber": "A1",
+      "row": 0,
+      "col": 0,
+      "status": "available",
+      "equipment": [
+        "电脑",
+        "显示器"
+      ]
+    },
+    {
+      "id": "seat-lab1-0-1",
+      "labId": "lab1",
+      "seatNumber": "A2",
+      "row": 0,
+      "col": 1,
+      "status": "occupied",
+      "equipment": [
+        "电脑",
+        "显示器"
+      ]
+    },
+    {
+      "id": "seat-lab1-0-2",
+      "labId": "lab1",
+      "seatNumber": "A3",
+      "row": 0,
+      "col": 2,
+      "status": "locked",
+      "equipment": [
+        "电脑",
+        "显示器"
+      ]
+    },
+    {
+      "id": "seat-lab1-0-3",
+      "labId": "lab1",
+      "seatNumber": "A4",
+      "row": 0,
+      "col": 3,
+      "status": "available",
+      "equipment": [
+        "电脑",
+        "显示器"
+      ]
+    },
+    {
+      "id": "seat-lab1-0-4",
+      "labId": "lab1",
+      "seatNumber": "A5",
+      "row": 0,
+      "col": 4,
+      "status": "locked",
+      "equipment": [
+        "电脑",
+        "显示器"
+      ]
+    },
+    {
+      "id": "seat-lab1-0-5",
+      "labId": "lab1",
+      "seatNumber": "A6",
+      "row": 0,
+      "col": 5,
+      "status": "occupied",
+      "equipment": [
+        "电脑",
+        "显示器"
+      ]
+    },
+    {
+      "id": "seat-lab1-0-6",
+      "labId": "lab1",
+      "seatNumber": "A7",
+      "row": 0,
+      "col": 6,
+      "status": "available",
+      "equipment": [
+        "电脑",
+        "显示器"
+      ]
+    },
+    {
+      "id": "seat-lab1-0-7",
+      "labId": "lab1",
+      "seatNumber": "A8",
+      "row": 0,
+      "col": 7,
+      "status": "available",
+      "equipment": [
+        "电脑",
+        "显示器"
+      ]
+    },
+    {
+      "id": "seat-lab1-1-0",
+      "labId": "lab1",
+      "seatNumber": "B1",
+      "row": 1,
+      "col": 0,
+      "status": "available",
+      "equipment": [
+        "电脑",
+        "显示器"
+      ]
+    },
+    {
+      "id": "seat-lab1-1-1",
+      "labId": "lab1",
+      "seatNumber": "B2",
+      "row": 1,
+      "col": 1,
+      "status": "available",
+      "equipment": [
+        "电脑",
+        "显示器"
+      ]
+    },
+    {
+      "id": "seat-lab1-1-2",
+      "labId": "lab1",
+      "seatNumber": "B3",
+      "row": 1,
+      "col": 2,
+      "status": "available",
+      "equipment": [
+        "电脑",
+        "显示器"
+      ]
+    },
+    {
+      "id": "seat-lab1-1-3",
+      "labId": "lab1",
+      "seatNumber": "B4",
+      "row": 1,
+      "col": 3,
+      "status": "available",
+      "equipment": [
+        "电脑",
+        "显示器"
+      ]
+    },
+    {
+      "id": "seat-lab1-1-4",
+      "labId": "lab1",
+      "seatNumber": "B5",
+      "row": 1,
+      "col": 4,
+      "status": "available",
+      "equipment": [
+        "电脑",
+        "显示器"
+      ]
+    },
+    {
+      "id": "seat-lab1-1-5",
+      "labId": "lab1",
+      "seatNumber": "B6",
+      "row": 1,
+      "col": 5,
+      "status": "available",
+      "equipment": [
+        "电脑",
+        "显示器"
+      ]
+    },
+    {
+      "id": "seat-lab1-1-6",
+      "labId": "lab1",
+      "seatNumber": "B7",
+      "row": 1,
+      "col": 6,
+      "status": "available",
+      "equipment": [
+        "电脑",
+        "显示器"
+      ]
+    },
+    {
+      "id": "seat-lab1-1-7",
+      "labId": "lab1",
+      "seatNumber": "B8",
+      "row": 1,
+      "col": 7,
+      "status": "available",
+      "equipment": [
+        "电脑",
+        "显示器"
+      ]
+    },
+    {
+      "id": "seat-lab1-2-0",
+      "labId": "lab1",
+      "seatNumber": "C1",
+      "row": 2,
+      "col": 0,
+      "status": "available",
+      "equipment": [
+        "电脑",
+        "显示器"
+      ]
+    },
+    {
+      "id": "seat-lab1-2-1",
+      "labId": "lab1",
+      "seatNumber": "C2",
+      "row": 2,
+      "col": 1,
+      "status": "locked",
+      "equipment": [
+        "电脑",
+        "显示器"
+      ]
+    },
+    {
+      "id": "seat-lab1-2-2",
+      "labId": "lab1",
+      "seatNumber": "C3",
+      "row": 2,
+      "col": 2,
+      "status": "occupied",
+      "equipment": [
+        "电脑",
+        "显示器"
+      ]
+    },
+    {
+      "id": "seat-lab1-2-3",
+      "labId": "lab1",
+      "seatNumber": "C4",
+      "row": 2,
+      "col": 3,
+      "status": "available",
+      "equipment": [
+        "电脑",
+        "显示器"
+      ]
+    },
+    {
+      "id": "seat-lab1-2-4",
+      "labId": "lab1",
+      "seatNumber": "C5",
+      "row": 2,
+      "col": 4,
+      "status": "occupied",
+      "equipment": [
+        "电脑",
+        "显示器"
+      ]
+    },
+    {
+      "id": "seat-lab1-2-5",
+      "labId": "lab1",
+      "seatNumber": "C6",
+      "row": 2,
+      "col": 5,
+      "status": "occupied",
+      "equipment": [
+        "电脑",
+        "显示器"
+      ]
+    },
+    {
+      "id": "seat-lab1-2-6",
+      "labId": "lab1",
+      "seatNumber": "C7",
+      "row": 2,
+      "col": 6,
+      "status": "available",
+      "equipment": [
+        "电脑",
+        "显示器"
+      ]
+    },
+    {
+      "id": "seat-lab1-2-7",
+      "labId": "lab1",
+      "seatNumber": "C8",
+      "row": 2,
+      "col": 7,
+      "status": "available",
+      "equipment": [
+        "电脑",
+        "显示器"
+      ]
+    },
+    {
+      "id": "seat-lab1-3-0",
+      "labId": "lab1",
+      "seatNumber": "D1",
+      "row": 3,
+      "col": 0,
+      "status": "available",
+      "equipment": [
+        "电脑",
+        "显示器"
+      ]
+    },
+    {
+      "id": "seat-lab1-3-1",
+      "labId": "lab1",
+      "seatNumber": "D2",
+      "row": 3,
+      "col": 1,
+      "status": "available",
+      "equipment": [
+        "电脑",
+        "显示器"
+      ]
+    },
+    {
+      "id": "seat-lab1-3-2",
+      "labId": "lab1",
+      "seatNumber": "D3",
+      "row": 3,
+      "col": 2,
+      "status": "available",
+      "equipment": [
+        "电脑",
+        "显示器"
+      ]
+    },
+    {
+      "id": "seat-lab1-3-3",
+      "labId": "lab1",
+      "seatNumber": "D4",
+      "row": 3,
+      "col": 3,
+      "status": "available",
+      "equipment": [
+        "电脑",
+        "显示器"
+      ]
+    },
+    {
+      "id": "seat-lab1-3-4",
+      "labId": "lab1",
+      "seatNumber": "D5",
+      "row": 3,
+      "col": 4,
+      "status": "available",
+      "equipment": [
+        "电脑",
+        "显示器"
+      ]
+    },
+    {
+      "id": "seat-lab1-3-5",
+      "labId": "lab1",
+      "seatNumber": "D6",
+      "row": 3,
+      "col": 5,
+      "status": "available",
+      "equipment": [
+        "电脑",
+        "显示器"
+      ]
+    },
+    {
+      "id": "seat-lab1-3-6",
+      "labId": "lab1",
+      "seatNumber": "D7",
+      "row": 3,
+      "col": 6,
+      "status": "available",
+      "equipment": [
+        "电脑",
+        "显示器"
+      ]
+    },
+    {
+      "id": "seat-lab1-3-7",
+      "labId": "lab1",
+      "seatNumber": "D8",
+      "row": 3,
+      "col": 7,
+      "status": "available",
+      "equipment": [
+        "电脑",
+        "显示器"
+      ]
+    },
+    {
+      "id": "seat-lab1-4-0",
+      "labId": "lab1",
+      "seatNumber": "E1",
+      "row": 4,
+      "col": 0,
+      "status": "available",
+      "equipment": [
+        "电脑",
+        "显示器"
+      ]
+    },
+    {
+      "id": "seat-lab1-4-1",
+      "labId": "lab1",
+      "seatNumber": "E2",
+      "row": 4,
+      "col": 1,
+      "status": "available",
+      "equipment": [
+        "电脑",
+        "显示器"
+      ]
+    },
+    {
+      "id": "seat-lab1-4-2",
+      "labId": "lab1",
+      "seatNumber": "E3",
+      "row": 4,
+      "col": 2,
+      "status": "available",
+      "equipment": [
+        "电脑",
+        "显示器"
+      ]
+    },
+    {
+      "id": "seat-lab1-4-3",
+      "labId": "lab1",
+      "seatNumber": "E4",
+      "row": 4,
+      "col": 3,
+      "status": "available",
+      "equipment": [
+        "电脑",
+        "显示器"
+      ]
+    },
+    {
+      "id": "seat-lab1-4-4",
+      "labId": "lab1",
+      "seatNumber": "E5",
+      "row": 4,
+      "col": 4,
+      "status": "available",
+      "equipment": [
+        "电脑",
+        "显示器"
+      ]
+    },
+    {
+      "id": "seat-lab1-4-5",
+      "labId": "lab1",
+      "seatNumber": "E6",
+      "row": 4,
+      "col": 5,
+      "status": "available",
+      "equipment": [
+        "电脑",
+        "显示器"
+      ]
+    },
+    {
+      "id": "seat-lab1-4-6",
+      "labId": "lab1",
+      "seatNumber": "E7",
+      "row": 4,
+      "col": 6,
+      "status": "available",
+      "equipment": [
+        "电脑",
+        "显示器"
+      ]
+    },
+    {
+      "id": "seat-lab1-4-7",
+      "labId": "lab1",
+      "seatNumber": "E8",
+      "row": 4,
+      "col": 7,
+      "status": "available",
+      "equipment": [
+        "电脑",
+        "显示器"
+      ]
+    },
+    {
+      "id": "seat-lab2-0-0",
+      "labId": "lab2",
+      "seatNumber": "A1",
+      "row": 0,
+      "col": 0,
+      "status": "locked",
+      "equipment": [
+        "电脑",
+        "显示器"
+      ]
+    },
+    {
+      "id": "seat-lab2-0-1",
+      "labId": "lab2",
+      "seatNumber": "A2",
+      "row": 0,
+      "col": 1,
+      "status": "available",
+      "equipment": [
+        "电脑",
+        "显示器"
+      ]
+    },
+    {
+      "id": "seat-lab2-0-2",
+      "labId": "lab2",
+      "seatNumber": "A3",
+      "row": 0,
+      "col": 2,
+      "status": "locked",
+      "equipment": [
+        "电脑",
+        "显示器"
+      ]
+    },
+    {
+      "id": "seat-lab2-0-3",
+      "labId": "lab2",
+      "seatNumber": "A4",
+      "row": 0,
+      "col": 3,
+      "status": "occupied",
+      "equipment": [
+        "电脑",
+        "显示器"
+      ]
+    },
+    {
+      "id": "seat-lab2-0-4",
+      "labId": "lab2",
+      "seatNumber": "A5",
+      "row": 0,
+      "col": 4,
+      "status": "available",
+      "equipment": [
+        "电脑",
+        "显示器"
+      ]
+    },
+    {
+      "id": "seat-lab2-0-5",
+      "labId": "lab2",
+      "seatNumber": "A6",
+      "row": 0,
+      "col": 5,
+      "status": "available",
+      "equipment": [
+        "电脑",
+        "显示器"
+      ]
+    },
+    {
+      "id": "seat-lab2-0-6",
+      "labId": "lab2",
+      "seatNumber": "A7",
+      "row": 0,
+      "col": 6,
+      "status": "available",
+      "equipment": [
+        "电脑",
+        "显示器"
+      ]
+    },
+    {
+      "id": "seat-lab2-0-7",
+      "labId": "lab2",
+      "seatNumber": "A8",
+      "row": 0,
+      "col": 7,
+      "status": "occupied",
+      "equipment": [
+        "电脑",
+        "显示器"
+      ]
+    },
+    {
+      "id": "seat-lab2-1-0",
+      "labId": "lab2",
+      "seatNumber": "B1",
+      "row": 1,
+      "col": 0,
+      "status": "locked",
+      "equipment": [
+        "电脑",
+        "显示器"
+      ]
+    },
+    {
+      "id": "seat-lab2-1-1",
+      "labId": "lab2",
+      "seatNumber": "B2",
+      "row": 1,
+      "col": 1,
+      "status": "available",
+      "equipment": [
+        "电脑",
+        "显示器"
+      ]
+    },
+    {
+      "id": "seat-lab2-1-2",
+      "labId": "lab2",
+      "seatNumber": "B3",
+      "row": 1,
+      "col": 2,
+      "status": "available",
+      "equipment": [
+        "电脑",
+        "显示器"
+      ]
+    },
+    {
+      "id": "seat-lab2-1-3",
+      "labId": "lab2",
+      "seatNumber": "B4",
+      "row": 1,
+      "col": 3,
+      "status": "available",
+      "equipment": [
+        "电脑",
+        "显示器"
+      ]
+    },
+    {
+      "id": "seat-lab2-1-4",
+      "labId": "lab2",
+      "seatNumber": "B5",
+      "row": 1,
+      "col": 4,
+      "status": "occupied",
+      "equipment": [
+        "电脑",
+        "显示器"
+      ]
+    },
+    {
+      "id": "seat-lab2-1-5",
+      "labId": "lab2",
+      "seatNumber": "B6",
+      "row": 1,
+      "col": 5,
+      "status": "available",
+      "equipment": [
+        "电脑",
+        "显示器"
+      ]
+    },
+    {
+      "id": "seat-lab2-1-6",
+      "labId": "lab2",
+      "seatNumber": "B7",
+      "row": 1,
+      "col": 6,
+      "status": "available",
+      "equipment": [
+        "电脑",
+        "显示器"
+      ]
+    },
+    {
+      "id": "seat-lab2-1-7",
+      "labId": "lab2",
+      "seatNumber": "B8",
+      "row": 1,
+      "col": 7,
+      "status": "available",
+      "equipment": [
+        "电脑",
+        "显示器"
+      ]
+    },
+    {
+      "id": "seat-lab2-2-0",
+      "labId": "lab2",
+      "seatNumber": "C1",
+      "row": 2,
+      "col": 0,
+      "status": "available",
+      "equipment": [
+        "电脑",
+        "显示器"
+      ]
+    },
+    {
+      "id": "seat-lab2-2-1",
+      "labId": "lab2",
+      "seatNumber": "C2",
+      "row": 2,
+      "col": 1,
+      "status": "available",
+      "equipment": [
+        "电脑",
+        "显示器"
+      ]
+    },
+    {
+      "id": "seat-lab2-2-2",
+      "labId": "lab2",
+      "seatNumber": "C3",
+      "row": 2,
+      "col": 2,
+      "status": "occupied",
+      "equipment": [
+        "电脑",
+        "显示器"
+      ]
+    },
+    {
+      "id": "seat-lab2-2-3",
+      "labId": "lab2",
+      "seatNumber": "C4",
+      "row": 2,
+      "col": 3,
+      "status": "available",
+      "equipment": [
+        "电脑",
+        "显示器"
+      ]
+    },
+    {
+      "id": "seat-lab2-2-4",
+      "labId": "lab2",
+      "seatNumber": "C5",
+      "row": 2,
+      "col": 4,
+      "status": "available",
+      "equipment": [
+        "电脑",
+        "显示器"
+      ]
+    },
+    {
+      "id": "seat-lab2-2-5",
+      "labId": "lab2",
+      "seatNumber": "C6",
+      "row": 2,
+      "col": 5,
+      "status": "available",
+      "equipment": [
+        "电脑",
+        "显示器"
+      ]
+    },
+    {
+      "id": "seat-lab2-2-6",
+      "labId": "lab2",
+      "seatNumber": "C7",
+      "row": 2,
+      "col": 6,
+      "status": "available",
+      "equipment": [
+        "电脑",
+        "显示器"
+      ]
+    },
+    {
+      "id": "seat-lab2-2-7",
+      "labId": "lab2",
+      "seatNumber": "C8",
+      "row": 2,
+      "col": 7,
+      "status": "available",
+      "equipment": [
+        "电脑",
+        "显示器"
+      ]
+    },
+    {
+      "id": "seat-lab2-3-0",
+      "labId": "lab2",
+      "seatNumber": "D1",
+      "row": 3,
+      "col": 0,
+      "status": "available",
+      "equipment": [
+        "电脑",
+        "显示器"
+      ]
+    },
+    {
+      "id": "seat-lab2-3-1",
+      "labId": "lab2",
+      "seatNumber": "D2",
+      "row": 3,
+      "col": 1,
+      "status": "occupied",
+      "equipment": [
+        "电脑",
+        "显示器"
+      ]
+    },
+    {
+      "id": "seat-lab2-3-2",
+      "labId": "lab2",
+      "seatNumber": "D3",
+      "row": 3,
+      "col": 2,
+      "status": "occupied",
+      "equipment": [
+        "电脑",
+        "显示器"
+      ]
+    },
+    {
+      "id": "seat-lab2-3-3",
+      "labId": "lab2",
+      "seatNumber": "D4",
+      "row": 3,
+      "col": 3,
+      "status": "available",
+      "equipment": [
+        "电脑",
+        "显示器"
+      ]
+    },
+    {
+      "id": "seat-lab2-3-4",
+      "labId": "lab2",
+      "seatNumber": "D5",
+      "row": 3,
+      "col": 4,
+      "status": "occupied",
+      "equipment": [
+        "电脑",
+        "显示器"
+      ]
+    },
+    {
+      "id": "seat-lab2-3-5",
+      "labId": "lab2",
+      "seatNumber": "D6",
+      "row": 3,
+      "col": 5,
+      "status": "locked",
+      "equipment": [
+        "电脑",
+        "显示器"
+      ]
+    },
+    {
+      "id": "seat-lab2-3-6",
+      "labId": "lab2",
+      "seatNumber": "D7",
+      "row": 3,
+      "col": 6,
+      "status": "available",
+      "equipment": [
+        "电脑",
+        "显示器"
+      ]
+    },
+    {
+      "id": "seat-lab2-3-7",
+      "labId": "lab2",
+      "seatNumber": "D8",
+      "row": 3,
+      "col": 7,
+      "status": "available",
+      "equipment": [
+        "电脑",
+        "显示器"
+      ]
+    },
+    {
+      "id": "seat-lab2-4-0",
+      "labId": "lab2",
+      "seatNumber": "E1",
+      "row": 4,
+      "col": 0,
+      "status": "locked",
+      "equipment": [
+        "电脑",
+        "显示器"
+      ]
+    },
+    {
+      "id": "seat-lab2-4-1",
+      "labId": "lab2",
+      "seatNumber": "E2",
+      "row": 4,
+      "col": 1,
+      "status": "available",
+      "equipment": [
+        "电脑",
+        "显示器"
+      ]
+    },
+    {
+      "id": "seat-lab2-4-2",
+      "labId": "lab2",
+      "seatNumber": "E3",
+      "row": 4,
+      "col": 2,
+      "status": "available",
+      "equipment": [
+        "电脑",
+        "显示器"
+      ]
+    },
+    {
+      "id": "seat-lab2-4-3",
+      "labId": "lab2",
+      "seatNumber": "E4",
+      "row": 4,
+      "col": 3,
+      "status": "available",
+      "equipment": [
+        "电脑",
+        "显示器"
+      ]
+    },
+    {
+      "id": "seat-lab2-4-4",
+      "labId": "lab2",
+      "seatNumber": "E5",
+      "row": 4,
+      "col": 4,
+      "status": "available",
+      "equipment": [
+        "电脑",
+        "显示器"
+      ]
+    },
+    {
+      "id": "seat-lab2-4-5",
+      "labId": "lab2",
+      "seatNumber": "E6",
+      "row": 4,
+      "col": 5,
+      "status": "locked",
+      "equipment": [
+        "电脑",
+        "显示器"
+      ]
+    },
+    {
+      "id": "seat-lab2-4-6",
+      "labId": "lab2",
+      "seatNumber": "E7",
+      "row": 4,
+      "col": 6,
+      "status": "available",
+      "equipment": [
+        "电脑",
+        "显示器"
+      ]
+    },
+    {
+      "id": "seat-lab2-4-7",
+      "labId": "lab2",
+      "seatNumber": "E8",
+      "row": 4,
+      "col": 7,
+      "status": "occupied",
+      "equipment": [
+        "电脑",
+        "显示器"
+      ]
+    }
+  ],
+  "reservations": [
+    {
+      "id": "r1",
+      "studentId": "u1",
+      "studentName": "张三",
+      "scheduleId": "s1",
+      "labId": "lab1",
+      "seatId": "seat-lab1-0-0",
+      "seatNumber": "A1",
+      "status": "confirmed",
+      "createdAt": "2026-06-13T10:00:00Z"
+    },
+    {
+      "id": "r2",
+      "studentId": "u2",
+      "studentName": "李四",
+      "scheduleId": "s1",
+      "labId": "lab1",
+      "seatId": "seat-lab1-0-1",
+      "seatNumber": "A2",
+      "status": "locked",
+      "lockedAt": "2026-06-13T18:28:50.257Z",
+      "lockExpiresAt": "2026-06-13T18:43:50.258Z",
+      "createdAt": "2026-06-13T10:30:00Z"
+    }
+  ],
+  "equipments": [
+    {
+      "id": "e1",
+      "name": "笔记本电脑",
+      "model": "ThinkPad X1",
+      "brand": "Lenovo",
+      "labId": "lab1",
+      "status": "available",
+      "category": "计算机",
+      "purchaseDate": "2023-09-01",
+      "price": 8999
+    },
+    {
+      "id": "e2",
+      "name": "投影仪",
+      "model": "CB-FH52",
+      "brand": "Epson",
+      "labId": "lab1",
+      "status": "available",
+      "category": "显示设备",
+      "purchaseDate": "2023-06-15",
+      "price": 5999
+    },
+    {
+      "id": "e3",
+      "name": "示波器",
+      "model": "DS1054Z",
+      "brand": "Rigol",
+      "labId": "lab3",
+      "status": "available",
+      "category": "电子设备",
+      "purchaseDate": "2022-12-20",
+      "price": 3599
+    },
+    {
+      "id": "e4",
+      "name": "万用表",
+      "model": "Fluke 17B+",
+      "brand": "Fluke",
+      "labId": "lab3",
+      "status": "borrowed",
+      "category": "电子设备",
+      "purchaseDate": "2023-03-10",
+      "price": 899
+    },
+    {
+      "id": "e5",
+      "name": "网络分析仪",
+      "model": "N9310A",
+      "brand": "Agilent",
+      "labId": "lab2",
+      "status": "maintenance",
+      "category": "网络设备",
+      "purchaseDate": "2022-08-05",
+      "price": 28000
+    },
+    {
+      "id": "e6",
+      "name": "烧杯套装",
+      "model": "50-1000ml",
+      "brand": "蜀玻",
+      "labId": "lab4",
+      "status": "available",
+      "category": "化学器皿",
+      "purchaseDate": "2023-09-10",
+      "price": 299
+    }
+  ],
+  "equipmentBorrows": [
+    {
+      "id": "eb1",
+      "equipmentId": "e4",
+      "equipmentName": "万用表",
+      "borrowerId": "u1",
+      "borrowerName": "张三",
+      "purpose": "电子电路实验测量",
+      "borrowDate": "2026-06-10",
+      "expectedReturnDate": "2026-06-12",
+      "status": "overdue",
+      "creditPenalty": 5
+    },
+    {
+      "id": "eb2",
+      "equipmentId": "e1",
+      "equipmentName": "笔记本电脑",
+      "borrowerId": "u2",
+      "borrowerName": "李四",
+      "purpose": "课程设计编程",
+      "borrowDate": "2026-06-12",
+      "expectedReturnDate": "2026-06-14",
+      "status": "borrowed",
+      "approverId": "u3"
+    }
+  ],
+  "labReports": [
+    {
+      "id": "rep1",
+      "studentId": "u1",
+      "studentName": "张三",
+      "courseId": "c1",
+      "courseName": "数据结构实验",
+      "title": "栈和队列的实现与应用",
+      "content": "## 实验目的\n掌握栈和队列的基本操作...\n\n## 实验内容\n1. 实现顺序栈...\n2. 实现链队列...",
+      "similarityScore": 15,
+      "status": "graded",
+      "grade": 92,
+      "feedback": "代码实现完整，分析深入，优秀！",
+      "graderId": "u3",
+      "submittedAt": "2026-06-10T15:30:00Z",
+      "gradedAt": "2026-06-12T10:00:00Z"
+    },
+    {
+      "id": "rep2",
+      "studentId": "u2",
+      "studentName": "李四",
+      "courseId": "c1",
+      "courseName": "数据结构实验",
+      "title": "栈和队列的实现与应用",
+      "content": "## 实验目的\n...",
+      "similarityScore": 78,
+      "status": "reviewing",
+      "submittedAt": "2026-06-11T16:00:00Z"
+    },
+    {
+      "id": "rep3",
+      "studentId": "u1",
+      "studentName": "张三",
+      "courseId": "c2",
+      "courseName": "操作系统实验",
+      "title": "进程调度算法模拟",
+      "content": "## 实验目的\n...",
+      "status": "draft",
+      "submittedAt": ""
+    }
+  ],
+  "grades": [
+    {
+      "id": "g1",
+      "studentId": "u1",
+      "studentName": "张三",
+      "courseId": "c1",
+      "courseName": "数据结构实验",
+      "reportGrades": [
+        {
+          "reportId": "rep1",
+          "title": "第一次实验",
+          "score": 92,
+          "weight": 50
+        },
+        {
+          "reportId": "rep4",
+          "title": "第二次实验",
+          "score": 88,
+          "weight": 50
+        }
+      ],
+      "operationScore": 90,
+      "operationWeight": 30,
+      "finalScore": 90.5,
+      "semester": "2025-2026春季"
+    },
+    {
+      "id": "g2",
+      "studentId": "u2",
+      "studentName": "李四",
+      "courseId": "c1",
+      "courseName": "数据结构实验",
+      "reportGrades": [
+        {
+          "reportId": "rep2",
+          "title": "第一次实验",
+          "score": 0,
+          "weight": 50
+        }
+      ],
+      "operationScore": 85,
+      "operationWeight": 30,
+      "finalScore": 0,
+      "semester": "2025-2026春季"
+    }
+  ],
+  "chemicals": [
+    {
+      "id": "chem1",
+      "name": "硫酸",
+      "casNumber": "7664-93-9",
+      "category": "酸",
+      "hazardLevel": "high",
+      "unit": "L",
+      "currentStock": 15,
+      "safetyStock": 10,
+      "unitPrice": 120,
+      "location": "化学柜A-1"
+    },
+    {
+      "id": "chem2",
+      "name": "氢氧化钠",
+      "casNumber": "1310-73-2",
+      "category": "碱",
+      "hazardLevel": "medium",
+      "unit": "kg",
+      "currentStock": 8,
+      "safetyStock": 5,
+      "unitPrice": 45,
+      "location": "化学柜A-2"
+    },
+    {
+      "id": "chem3",
+      "name": "乙醇",
+      "casNumber": "64-17-5",
+      "category": "有机溶剂",
+      "hazardLevel": "medium",
+      "unit": "L",
+      "currentStock": 25,
+      "safetyStock": 20,
+      "unitPrice": 85,
+      "location": "防爆柜B-1"
+    },
+    {
+      "id": "chem4",
+      "name": "丙酮",
+      "casNumber": "67-64-1",
+      "category": "有机溶剂",
+      "hazardLevel": "medium",
+      "unit": "L",
+      "currentStock": 3,
+      "safetyStock": 10,
+      "unitPrice": 95,
+      "location": "防爆柜B-2"
+    },
+    {
+      "id": "chem5",
+      "name": "氰化钾",
+      "casNumber": "151-50-8",
+      "category": "剧毒",
+      "hazardLevel": "extreme",
+      "unit": "g",
+      "currentStock": 50,
+      "safetyStock": 100,
+      "unitPrice": 280,
+      "location": "保险柜C-1"
+    }
+  ],
+  "chemicalRequests": [
+    {
+      "id": "cr1",
+      "chemicalId": "chem1",
+      "chemicalName": "硫酸",
+      "requesterId": "u3",
+      "requesterName": "王教授",
+      "quantity": 2,
+      "purpose": "分析化学实验",
+      "supervisorId": "u3",
+      "supervisorStatus": "approved",
+      "directorId": "u4",
+      "directorStatus": "pending",
+      "status": "pending",
+      "createdAt": "2026-06-12T09:00:00Z"
+    },
+    {
+      "id": "cr2",
+      "chemicalId": "chem3",
+      "chemicalName": "乙醇",
+      "requesterId": "u3",
+      "requesterName": "王教授",
+      "quantity": 5,
+      "purpose": "有机化学实验",
+      "supervisorId": "u3",
+      "supervisorStatus": "approved",
+      "supervisorComment": "同意领用",
+      "directorId": "u4",
+      "directorStatus": "approved",
+      "directorComment": "批准",
+      "status": "approved",
+      "createdAt": "2026-06-10T14:30:00Z"
+    }
+  ],
+  "purchaseRequests": [
+    {
+      "id": "pr1",
+      "chemicalId": "chem4",
+      "chemicalName": "丙酮",
+      "quantity": 20,
+      "reason": "库存低于安全线，实验教学需要",
+      "status": "pending",
+      "createdBy": "u4",
+      "createdAt": "2026-06-13T10:00:00Z"
+    },
+    {
+      "id": "pr2",
+      "chemicalId": "chem5",
+      "chemicalName": "氰化钾",
+      "quantity": 100,
+      "reason": "库存不足，需要补充",
+      "status": "approved",
+      "createdBy": "u4",
+      "createdAt": "2026-06-11T11:00:00Z"
+    }
+  ],
+  "waitlist": []
+}
