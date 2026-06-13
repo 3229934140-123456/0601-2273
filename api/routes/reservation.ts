@@ -1,9 +1,53 @@
 import { Router, Request, Response } from 'express';
 import { dataStore, generateId } from '../data/mockData';
-import { authenticate, requireStudent } from '../middleware/auth';
+import { authenticate, requireStudent, requireTeacher } from '../middleware/auth';
 import type { Reservation, Seat, ApiResponse, WaitlistItem } from '../../shared/types';
 
 const router = Router();
+
+interface RosterData {
+  scheduleId: string;
+  schedule: any;
+  confirmed: Reservation[];
+  locked: Reservation[];
+  waitlist: WaitlistItem[];
+}
+
+router.get('/roster', authenticate, requireTeacher, (req: Request, res: Response<ApiResponse<RosterData[]>>) => {
+  const { scheduleId } = req.query;
+
+  cleanExpiredLocks();
+
+  let schedules = [...dataStore.schedules];
+  if (scheduleId) {
+    schedules = schedules.filter(s => s.id === scheduleId);
+  }
+
+  schedules.sort((a, b) => {
+    const dateCompare = a.date.localeCompare(b.date);
+    if (dateCompare !== 0) return dateCompare;
+    return a.startTime.localeCompare(b.startTime);
+  });
+
+  const roster: RosterData[] = schedules.map(schedule => {
+    const reservations = dataStore.reservations.filter(r => r.scheduleId === schedule.id);
+    const confirmed = reservations.filter(r => r.status === 'confirmed');
+    const locked = reservations.filter(r => r.status === 'locked');
+    const waitlist = dataStore.waitlist
+      .filter(w => w.scheduleId === schedule.id && (w.status === 'waiting' || w.status === 'notified'))
+      .sort((a, b) => a.position - b.position);
+
+    return {
+      scheduleId: schedule.id,
+      schedule,
+      confirmed,
+      locked,
+      waitlist,
+    };
+  });
+
+  res.json({ success: true, data: roster });
+});
 
 router.get('/', authenticate, requireStudent, (req: Request, res: Response<ApiResponse<Reservation[]>>) => {
   const { studentId, scheduleId, status } = req.query;

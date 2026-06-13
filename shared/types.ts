@@ -44,6 +44,7 @@ export interface Schedule {
   status: 'scheduled' | 'ongoing' | 'completed' | 'cancelled';
   conflict?: boolean;
   conflictInfo?: string;
+  studentIds?: string[];
 }
 
 export interface ScheduleConflict {
@@ -170,6 +171,9 @@ export interface ChemicalRequest {
   directorComment?: string;
   status: 'pending' | 'approved' | 'rejected' | 'completed';
   createdAt: string;
+  supervisorApprovedAt?: string;
+  directorApprovedAt?: string;
+  completedAt?: string;
 }
 
 export interface PurchaseRequest {

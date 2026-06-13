@@ -12,6 +12,7 @@ import Grade from "@/pages/Grade";
 import Chemical from "@/pages/Chemical";
 import DataCenter from "@/pages/DataCenter";
 import Profile from "@/pages/Profile";
+import Roster from "@/pages/Roster";
 
 function RootRedirect() {
   const { user, isAuthenticated } = useAuthStore();
@@ -48,6 +49,17 @@ export default function App() {
             <ProtectedRoute allowedRoles={["teacher", "admin", "leader"]}>
               <Layout>
                 <Schedule />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/roster"
+          element={
+            <ProtectedRoute allowedRoles={["teacher", "admin", "leader"]}>
+              <Layout>
+                <Roster />
               </Layout>
             </ProtectedRoute>
           }

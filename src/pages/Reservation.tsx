@@ -141,6 +141,52 @@ function CountdownTimer({ expiresAt, onExpire }: CountdownTimerProps) {
   );
 }
 
+interface NotifiedCountdownProps {
+  notifiedAvailableAt: string;
+  onExpire: () => void;
+}
+
+function NotifiedCountdown({ notifiedAvailableAt, onExpire }: NotifiedCountdownProps) {
+  const [timeLeft, setTimeLeft] = useState({ minutes: 0, seconds: 0 });
+
+  useEffect(() => {
+    const calculateTimeLeft = () => {
+      const now = new Date().getTime();
+      const expireTime = new Date(notifiedAvailableAt).getTime() + 15 * 60 * 1000;
+      const diff = expireTime - now;
+
+      if (diff <= 0) {
+        setTimeLeft({ minutes: 0, seconds: 0 });
+        onExpire();
+        return;
+      }
+
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+      setTimeLeft({ minutes, seconds });
+    };
+
+    calculateTimeLeft();
+    const timer = setInterval(calculateTimeLeft, 1000);
+
+    return () => clearInterval(timer);
+  }, [notifiedAvailableAt, onExpire]);
+
+  const isUrgent = timeLeft.minutes < 3;
+
+  return (
+    <div className="flex items-center gap-1.5">
+      <Timer className={cn('w-3.5 h-3.5', isUrgent ? 'text-danger animate-pulse' : 'text-warning')} />
+      <span className={cn(
+        'text-xs font-bold number-counter',
+        isUrgent ? 'text-danger' : 'text-warning'
+      )}>
+        剩余可锁定：{String(timeLeft.minutes).padStart(2, '0')}:{String(timeLeft.seconds).padStart(2, '0')}
+      </span>
+    </div>
+  );
+}
+
 function getWaitlistStatusBadge(status: WaitlistItem['status']) {
   const statusMap = {
     waiting: { className: 'status-info', label: '等待中' },
@@ -274,6 +320,15 @@ export default function Reservation() {
     }
   };
 
+  const refreshAll = useCallback(async () => {
+    await Promise.all([
+      fetchWaitlist(),
+      fetchMyWaitlist(),
+      fetchSeats(),
+      fetchReservations(),
+    ]);
+  }, []);
+
   const handleSeatClick = (seat: Seat) => {
     if (seat.status !== 'available') return;
     setSelectedSeat(seat);
@@ -297,8 +352,7 @@ export default function Reservation() {
         setLockedReservation(response.data.data);
         setShowConfirmModal(false);
         setSelectedSeat(null);
-        fetchSeats();
-        fetchReservations();
+        refreshAll();
       }
     } catch (error: any) {
       showMessage(error.response?.data?.error || '预约失败', 'error');
@@ -311,8 +365,7 @@ export default function Reservation() {
       if (response.data.success && response.data.data) {
         showMessage('预约确认成功', 'success');
         setLockedReservation(null);
-        fetchSeats();
-        fetchReservations();
+        refreshAll();
       }
     } catch (error: any) {
       showMessage(error.response?.data?.error || '确认失败', 'error');
@@ -333,8 +386,7 @@ export default function Reservation() {
 
       if (response.data.success && response.data.data) {
         showMessage(response.data.message || '已加入候补队列', 'success');
-        fetchWaitlist();
-        fetchMyWaitlist();
+        refreshAll();
       }
     } catch (error: any) {
       showMessage(error.response?.data?.error || '加入候补失败', 'error');
@@ -346,8 +398,7 @@ export default function Reservation() {
       const response = await reservationAPI.leaveWaitlist(id);
       if (response.data.success) {
         showMessage(response.data.message || '已退出候补队列', 'success');
-        fetchWaitlist();
-        fetchMyWaitlist();
+        refreshAll();
       }
     } catch (error: any) {
       showMessage(error.response?.data?.error || '退出候补失败', 'error');
@@ -398,6 +449,22 @@ export default function Reservation() {
     if (!selectedSchedule) return null;
     return myWaitlist.find(w => w.scheduleId === selectedSchedule);
   }, [myWaitlist, selectedSchedule]);
+
+  const activeWaitlist = useMemo(() => {
+    return waitlist
+      .filter(w => w.status === 'waiting' || w.status === 'notified')
+      .sort((a, b) => a.position - b.position);
+  }, [waitlist]);
+
+  const activeMyWaitlist = useMemo(() => {
+    return myWaitlist
+      .filter(w => w.status === 'waiting' || w.status === 'notified')
+      .sort((a, b) => a.position - b.position);
+  }, [myWaitlist]);
+
+  const handleNotifiedExpire = useCallback(() => {
+    refreshAll();
+  }, [refreshAll]);
 
   return (
     <div className="min-h-screen">
@@ -617,9 +684,9 @@ export default function Reservation() {
               <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
                 <Users className="w-5 h-5 text-primary-400" />
                 候补队列
-                {selectedSchedule && waitlist.length > 0 && (
+                {selectedSchedule && activeWaitlist.length > 0 && (
                   <span className="ml-auto text-sm text-dark-500">
-                    共 {waitlist.length} 人
+                    共 {activeWaitlist.length} 人
                   </span>
                 )}
               </h3>
@@ -634,7 +701,7 @@ export default function Reservation() {
                 <div className="flex items-center justify-center py-8">
                   <div className="animate-spin w-6 h-6 border-3 border-primary-500 border-t-transparent rounded-full" />
                 </div>
-              ) : waitlist.length === 0 ? (
+              ) : activeWaitlist.length === 0 ? (
                 <div className="text-center py-8 text-dark-500">
                   <Users className="w-12 h-12 mx-auto mb-2 opacity-30" />
                   <p>暂无候补排队</p>
@@ -642,7 +709,7 @@ export default function Reservation() {
                 </div>
               ) : (
                 <div className="space-y-2 max-h-[320px] overflow-y-auto">
-                  {waitlist.map((item, idx) => {
+                  {activeWaitlist.map((item, idx) => {
                     const isMine = myWaitlist.some(m => m.id === item.id);
                     const myItem = myWaitlist.find(m => m.id === item.id);
                     const status = getWaitlistStatusBadge(item.status);
@@ -663,7 +730,7 @@ export default function Reservation() {
                           <div className="flex items-center gap-2">
                             <span className={cn(
                               'w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold',
-                              idx === 0 ? 'bg-warning text-dark-900' : 'bg-dark-400 text-white'
+                              item.position === 1 ? 'bg-warning text-dark-900' : 'bg-dark-400 text-white'
                             )}>
                               {item.position}
                             </span>
@@ -686,6 +753,14 @@ export default function Reservation() {
                               <Zap className="w-4 h-4" />
                               有座位释放，您可锁定！
                             </div>
+                            {item.notifiedAvailableAt && (
+                              <div className="mt-1.5">
+                                <NotifiedCountdown
+                                  notifiedAvailableAt={item.notifiedAvailableAt}
+                                  onExpire={handleNotifiedExpire}
+                                />
+                              </div>
+                            )}
                           </div>
                         )}
 
@@ -722,14 +797,14 @@ export default function Reservation() {
               )}
             </div>
 
-            {myWaitlist.length > 0 && (
+            {activeMyWaitlist.length > 0 && (
               <div className="glass-card p-4">
                 <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
                   <Zap className="w-5 h-5 text-warning" />
                   我的候补
                 </h3>
                 <div className="space-y-2 max-h-[240px] overflow-y-auto">
-                  {myWaitlist.map((item) => {
+                  {activeMyWaitlist.map((item) => {
                     const status = getWaitlistStatusBadge(item.status);
                     const schedule = schedules.find(s => s.id === item.scheduleId);
                     const isNotified = item.status === 'notified';
@@ -739,7 +814,7 @@ export default function Reservation() {
                         className={cn(
                           'p-3 rounded-lg border',
                           isNotified
-                            ? 'bg-warning/20 border-warning/50'
+                            ? 'bg-warning/20 border-warning/50 animate-pulse'
                             : 'bg-dark-300/50 border-dark-400/50'
                         )}
                       >
@@ -761,6 +836,14 @@ export default function Reservation() {
                             <span>{schedule?.date} {schedule?.startTime}</span>
                           </div>
                         </div>
+                        {isNotified && item.notifiedAvailableAt && (
+                          <div className="mb-2">
+                            <NotifiedCountdown
+                              notifiedAvailableAt={item.notifiedAvailableAt}
+                              onExpire={handleNotifiedExpire}
+                            />
+                          </div>
+                        )}
                         <div className="flex gap-2">
                           {isNotified && (
                             <button

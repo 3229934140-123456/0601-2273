@@ -12,6 +12,7 @@ import {
   FlaskConical,
   Database,
   User,
+  Users,
   LogOut,
   Menu,
   X,
@@ -31,6 +32,7 @@ interface MenuItem {
 const menuItems: MenuItem[] = [
   { path: '/dashboard', label: '大屏监控', icon: Home, roles: ['teacher', 'admin', 'leader'] },
   { path: '/schedule', label: '排课管理', icon: Calendar, roles: ['teacher', 'admin', 'leader'] },
+  { path: '/roster', label: '预约名单', icon: Users, roles: ['teacher', 'admin', 'leader'] },
   { path: '/reservation', label: '预约管理', icon: ClipboardList, roles: ['student', 'teacher', 'admin', 'leader'] },
   { path: '/equipment', label: '设备借用', icon: Wrench, roles: ['teacher', 'admin', 'leader'] },
   { path: '/report', label: '实验报告', icon: FileText, roles: ['teacher', 'admin', 'leader'] },

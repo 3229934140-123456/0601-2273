@@ -90,6 +90,8 @@ export const reservationAPI = {
     api.delete<ApiResponse<void>>(`/reservation/waitlist/${id}`),
   claimWaitlist: (id: string) =>
     api.post<ApiResponse<Reservation>>(`/reservation/waitlist/${id}/claim`),
+  getRoster: (scheduleId?: string) =>
+    api.get<ApiResponse<any[]>>('/reservation/roster', { params: scheduleId ? { scheduleId } : undefined }),
 };
 
 export const equipmentAPI = {

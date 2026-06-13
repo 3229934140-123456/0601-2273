@@ -79,6 +79,7 @@ export default function Chemical() {
   });
 
   const [submitting, setSubmitting] = useState(false);
+  const [newRequestId, setNewRequestId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchData();
@@ -116,6 +117,21 @@ export default function Chemical() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (newRequestId) {
+      const timer = setTimeout(() => {
+        const element = document.getElementById(`request-${newRequestId}`);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        setTimeout(() => {
+          setNewRequestId(null);
+        }, 3000);
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [newRequestId, chemicalRequests]);
 
   const fetchTeachers = async () => {
     try {
@@ -161,11 +177,13 @@ export default function Chemical() {
     setSubmitting(true);
     try {
       const response = await chemicalAPI.request(formData);
-      if (response.data.success) {
-        setChemicalRequests((prev) => [...prev, response.data.data!]);
+      if (response.data.success && response.data.data) {
+        const newRequest = response.data.data;
         setShowRequestForm(false);
         resetForm();
-        fetchData();
+        setActiveTab('requests');
+        setNewRequestId(newRequest.id);
+        await fetchData();
       }
     } catch (error) {
       console.error('Failed to submit request:', error);
@@ -190,6 +208,17 @@ export default function Chemical() {
     if (request.directorStatus !== 'approved') return 2;
     if (request.status === 'approved') return 3;
     return 1;
+  };
+
+  const formatDateTime = (isoString?: string) => {
+    if (!isoString) return '';
+    return new Date(isoString).toLocaleString('zh-CN');
+  };
+
+  const getApprovalStatusConfig = (status: 'pending' | 'approved' | 'rejected') => {
+    if (status === 'approved') return { label: '通过', className: 'bg-success/20 text-success border-success/30' };
+    if (status === 'rejected') return { label: '驳回', className: 'bg-danger/20 text-danger border-danger/30' };
+    return { label: '待审批', className: 'bg-warning/20 text-warning border-warning/30' };
   };
 
   const lowStockChemicals = chemicals.filter((c) => c.currentStock < c.safetyStock);
@@ -516,13 +545,25 @@ export default function Chemical() {
                 chemicalRequests.map((request) => {
                   const step = getRequestStep(request);
                   const statusConfig = REQUEST_STATUS_CONFIG[request.status];
+                  const isNewRequest = newRequestId === request.id;
+                  const supervisorStatusConfig = getApprovalStatusConfig(request.supervisorStatus);
+                  const directorStatusConfig = getApprovalStatusConfig(request.directorStatus);
                   return (
-                    <div key={request.id} className="bg-dark-300/30 rounded-lg p-4 border border-dark-400">
+                    <div
+                      key={request.id}
+                      id={`request-${request.id}`}
+                      className={cn(
+                        'bg-dark-300/30 rounded-lg p-4 border transition-all duration-300',
+                        isNewRequest
+                          ? 'border-primary-500 border-2 animate-pulse shadow-lg shadow-primary-500/20'
+                          : 'border-dark-400'
+                      )}
+                    >
                       <div className="flex items-center justify-between mb-4">
                         <div>
                           <h3 className="text-white font-medium">{request.chemicalName}</h3>
                           <p className="text-dark-400 text-sm">
-                            申请人: {request.requesterName} · 申请时间: {new Date(request.createdAt).toLocaleString('zh-CN')}
+                            申请人: {request.requesterName} · 申请时间: {formatDateTime(request.createdAt)}
                           </p>
                         </div>
                         <span className={cn('px-3 py-1 rounded-full text-sm font-medium border', statusConfig.className)}>
@@ -572,16 +613,62 @@ export default function Chemical() {
                             </div>
                           ))}
                         </div>
-                        {request.supervisorComment && (
-                          <p className="text-sm text-dark-400">
-                            导师意见: {request.supervisorComment}
-                          </p>
-                        )}
-                        {request.directorComment && (
-                          <p className="text-sm text-dark-400 ml-4">
-                            主任意见: {request.directorComment}
-                          </p>
-                        )}
+                      </div>
+                      <div className="grid grid-cols-4 gap-3 mt-4 pt-4 border-t border-dark-400/50">
+                        <div className="text-sm">
+                          <div className="text-dark-500 mb-1">提交</div>
+                          <div className="text-white text-xs">{formatDateTime(request.createdAt)}</div>
+                        </div>
+                        <div className="text-sm">
+                          <div className="text-dark-500 mb-1 flex items-center gap-1">
+                            导师审批
+                            {request.supervisorStatus !== 'pending' && (
+                              <span className={cn('px-1.5 py-0.5 rounded text-xs border', supervisorStatusConfig.className)}>
+                                {supervisorStatusConfig.label}
+                              </span>
+                            )}
+                          </div>
+                          {request.supervisorStatus === 'pending' ? (
+                            <div className="text-warning text-xs">待审批</div>
+                          ) : (
+                            <>
+                              <div className="text-white text-xs">{formatDateTime(request.supervisorApprovedAt)}</div>
+                              {request.supervisorComment && (
+                                <div className="text-dark-400 text-xs mt-0.5">{request.supervisorComment}</div>
+                              )}
+                            </>
+                          )}
+                        </div>
+                        <div className="text-sm">
+                          <div className="text-dark-500 mb-1 flex items-center gap-1">
+                            主任审批
+                            {request.directorStatus !== 'pending' && (
+                              <span className={cn('px-1.5 py-0.5 rounded text-xs border', directorStatusConfig.className)}>
+                                {directorStatusConfig.label}
+                              </span>
+                            )}
+                          </div>
+                          {request.directorStatus === 'pending' ? (
+                            <div className="text-warning text-xs">待审批</div>
+                          ) : (
+                            <>
+                              <div className="text-white text-xs">{formatDateTime(request.directorApprovedAt)}</div>
+                              {request.directorComment && (
+                                <div className="text-dark-400 text-xs mt-0.5">{request.directorComment}</div>
+                              )}
+                            </>
+                          )}
+                        </div>
+                        <div className="text-sm">
+                          <div className="text-dark-500 mb-1">完成</div>
+                          {request.completedAt ? (
+                            <div className="text-white text-xs">{formatDateTime(request.completedAt)}</div>
+                          ) : request.status === 'rejected' ? (
+                            <div className="text-danger text-xs">已驳回</div>
+                          ) : (
+                            <div className="text-dark-500 text-xs">进行中</div>
+                          )}
+                        </div>
                       </div>
                     </div>
                   );

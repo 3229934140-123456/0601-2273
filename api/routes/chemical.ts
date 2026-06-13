@@ -111,6 +111,7 @@ router.post('/request/:id/approve-supervisor', authenticate, requireTeacher, (re
   }
 
   request.supervisorStatus = approved ? 'approved' : 'rejected';
+  request.supervisorApprovedAt = new Date().toISOString();
   if (comment) {
     request.supervisorComment = comment;
   }
@@ -119,6 +120,7 @@ router.post('/request/:id/approve-supervisor', authenticate, requireTeacher, (re
     request.status = 'rejected';
   } else if (request.directorStatus === 'approved') {
     request.status = 'approved';
+    request.completedAt = new Date().toISOString();
     const chemical = dataStore.chemicals.find(c => c.id === request.chemicalId);
     if (chemical) {
       chemical.currentStock -= request.quantity;
@@ -148,6 +150,7 @@ router.post('/request/:id/approve-director', authenticate, requireAdmin, (req: R
   }
 
   request.directorStatus = approved ? 'approved' : 'rejected';
+  request.directorApprovedAt = new Date().toISOString();
   if (comment) {
     request.directorComment = comment;
   }
@@ -156,6 +159,7 @@ router.post('/request/:id/approve-director', authenticate, requireAdmin, (req: R
     request.status = 'rejected';
   } else if (request.supervisorStatus === 'approved') {
     request.status = 'approved';
+    request.completedAt = new Date().toISOString();
     const chemical = dataStore.chemicals.find(c => c.id === request.chemicalId);
     if (chemical) {
       chemical.currentStock -= request.quantity;

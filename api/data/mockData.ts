@@ -134,6 +134,7 @@ export const mockSchedules: Schedule[] = [
     startTime: '08:30',
     endTime: '10:30',
     status: 'scheduled',
+    studentIds: ['u1', 'u2'],
   },
   {
     id: 's2',
@@ -148,6 +149,7 @@ export const mockSchedules: Schedule[] = [
     startTime: '14:00',
     endTime: '16:00',
     status: 'scheduled',
+    studentIds: ['u1', 'u2'],
   },
   {
     id: 's3',
@@ -162,6 +164,7 @@ export const mockSchedules: Schedule[] = [
     startTime: '08:30',
     endTime: '10:30',
     status: 'ongoing',
+    studentIds: ['u1', 'u2'],
   },
   {
     id: 's4',
@@ -176,6 +179,7 @@ export const mockSchedules: Schedule[] = [
     startTime: '14:00',
     endTime: '16:00',
     status: 'completed',
+    studentIds: ['u1', 'u2'],
   },
 ];
 

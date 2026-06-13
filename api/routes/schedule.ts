@@ -7,7 +7,17 @@ const router = Router();
 
 router.get('/', authenticate, (req: Request, res: Response<ApiResponse<Schedule[]>>) => {
   const { date, teacherId, labId } = req.query;
+  const reqWithAuth = req as Request & { userId: string; userRole: string };
   let schedules = [...dataStore.schedules];
+
+  if (reqWithAuth.userRole === 'student') {
+    const userId = reqWithAuth.userId;
+    schedules = schedules.filter(s =>
+      s.studentIds === undefined ||
+      s.studentIds.length === 0 ||
+      s.studentIds.includes(userId)
+    );
+  }
 
   if (date) {
     schedules = schedules.filter(s => s.date === date);
